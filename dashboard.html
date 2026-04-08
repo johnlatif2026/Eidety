@@ -23,73 +23,73 @@
   </div>
 
 <script>
-  const content = document.getElementById('content');
-  const logoutBtn = document.getElementById('logoutBtn');
-  const token = localStorage.getItem('jwt');
+const content = document.getElementById('content');
+const logoutBtn = document.getElementById('logoutBtn');
+const token = localStorage.getItem('jwt');
 
-  // إذا لم يكن هناك توكن، أعد توجيه المستخدم إلى صفحة الدخول
-  if (!token) {
-    window.location.href = '/login';
-  }
+// إذا لم يكن هناك توكن، أعِد التوجيه مباشرة
+if (!token) {
+  window.location.href = '/login';
+}
 
-  // تسجيل الخروج
-  logoutBtn.addEventListener('click', () => {
-    localStorage.removeItem('jwt');
-    window.location.href = '/login';
+// تسجيل الخروج
+logoutBtn.addEventListener('click', () => {
+  localStorage.removeItem('jwt');
+  window.location.href = '/login';
+});
+
+// دالة الهروب من HTML لمنع XSS
+function escapeHtml(s) {
+  if (!s) return '';
+  return String(s).replace(/[&<>"']/g, function(m){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m];
   });
+}
 
-  // دالة الهروب من HTML لمنع XSS
-  function escapeHtml(s) {
-    if (!s) return '';
-    return String(s).replace(/[&<>"']/g, function(m){
-      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m];
+// تحميل البيانات من السيرفر
+async function loadData() {
+  content.textContent = 'جارٍ التحميل...';
+
+  try {
+    const res = await fetch('/dashboard/data', {
+      method: 'GET',
+      headers: {
+        'Authorization': 'Bearer ' + token,
+        'Content-Type': 'application/json'
+      }
     });
-  }
 
-  // تحميل البيانات من السيرفر
-  async function loadData() {
-    content.textContent = 'جارٍ التحميل...';
-
-    try {
-      const res = await fetch('/dashboard/data', {
-        method: 'GET',
-        headers: new Headers({
-          'Authorization': 'Bearer ' + token,
-          'Content-Type': 'application/json'
-        })
-      });
-
-      if (res.status === 401 || res.status === 403) {
-        content.innerHTML = '<p class="error">لا تملك صلاحية الدخول. يرجى تسجيل الدخول مجددًا.</p>';
-        return;
-      }
-
-      const data = await res.json();
-
-      if (!Array.isArray(data) || data.length === 0) {
-        content.innerHTML = '<div>لا توجد تحويلات بعد.</div>';
-        return;
-      }
-
-      let html = '<table><thead><tr><th>#</th><th>اسم المستخدم</th><th>الهدية</th><th>رقم الصندوق</th><th>الوقت</th></tr></thead><tbody>';
-      data.forEach((t, i) => {
-        html += `<tr>
-          <td>${i+1}</td>
-          <td>${escapeHtml(t.username)}</td>
-          <td>${escapeHtml(t.gift)}</td>
-          <td>${escapeHtml(t.boxNumber)}</td>
-          <td>${new Date(t.savedAt).toLocaleString('ar-EG')}</td>
-        </tr>`;
-      });
-      html += '</tbody></table>';
-      content.innerHTML = html;
-
-    } catch (err) {
-      content.textContent = 'فشل الاتصال بالخادم';
+    if (res.status === 401 || res.status === 403) {
+      content.innerHTML = '<p class="error">غير مسموح بالدخول. سيتم إعادة التوجيه إلى صفحة الدخول...</p>';
+      setTimeout(() => window.location.href = '/login', 2000);
+      return;
     }
-  }
 
-  loadData();
+    const data = await res.json();
+    if (!Array.isArray(data) || data.length === 0) {
+      content.innerHTML = '<div>لا توجد تحويلات بعد.</div>';
+      return;
+    }
+
+    let html = '<table><thead><tr><th>#</th><th>اسم المستخدم</th><th>الهدية</th><th>رقم الصندوق</th><th>الوقت</th></tr></thead><tbody>';
+    data.forEach((t, i) => {
+      html += `<tr>
+        <td>${i+1}</td>
+        <td>${escapeHtml(t.username)}</td>
+        <td>${escapeHtml(t.gift)}</td>
+        <td>${escapeHtml(t.boxNumber)}</td>
+        <td>${new Date(t.savedAt).toLocaleString('ar-EG')}</td>
+      </tr>`;
+    });
+    html += '</tbody></table>';
+    content.innerHTML = html;
+
+  } catch (err) {
+    content.textContent = 'فشل الاتصال بالخادم';
+  }
+}
+
+loadData();
 </script>
 </body>
 </html>
