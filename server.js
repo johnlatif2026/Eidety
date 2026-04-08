@@ -10,15 +10,12 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// إعدادات الميدلوير
 app.use(cors());
 app.use(bodyParser.json());
 app.use(express.static('public'));
 
-// قراءة إعدادات من .env
 const { ADMIN_USER, ADMIN_PASS, JWT_SECRET, TELEGRAM_TOKEN, TELEGRAM_CHAT_ID } = process.env;
 
-// ===== Middleware للتحقق من JWT =====
 function authenticateToken(req, res, next) {
     const token = req.headers['authorization']?.split(' ')[1];
     if (!token) return res.status(401).json({ message: 'Unauthorized' });
@@ -30,7 +27,6 @@ function authenticateToken(req, res, next) {
     });
 }
 
-// ===== مسار تسجيل الدخول =====
 app.post('/api/login', (req, res) => {
     const { username, password } = req.body;
 
@@ -42,7 +38,6 @@ app.post('/api/login', (req, res) => {
     res.status(401).json({ success: false, message: 'خطأ في اسم المستخدم أو كلمة المرور' });
 });
 
-// ===== مسار إرسال البيانات للتليجرام =====
 app.post('/send-to-telegram', async (req, res) => {
     try {
         const { username, gift, boxNumber, timestamp, ip } = req.body;
@@ -71,7 +66,6 @@ app.post('/send-to-telegram', async (req, res) => {
     }
 });
 
-// ===== مسار عرض البيانات للوحة التحكم محمي بـ JWT =====
 app.get('/dashboard/data', authenticateToken, (req, res) => {
     try {
         const data = fs.readFileSync(path.join(__dirname, 'data.json'), 'utf8');
@@ -81,23 +75,18 @@ app.get('/dashboard/data', authenticateToken, (req, res) => {
     }
 });
 
-// ===== صفحات ثابتة =====
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
 app.get('/login', (req, res) => res.sendFile(path.join(__dirname, 'login.html')));
 app.get('/dashboard', authenticateToken, (req, res) => res.sendFile(path.join(__dirname, 'dashboard.html')));
 
-// ===== دالة حفظ البيانات =====
 function saveToFile(data) {
     const filePath = path.join(__dirname, 'data.json');
     let existingData = [];
-    try {
-        existingData = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-    } catch (err) {}
+    try { existingData = JSON.parse(fs.readFileSync(filePath, 'utf8')); } catch (err) {}
     existingData.push({ ...data, savedAt: new Date().toISOString() });
     fs.writeFileSync(filePath, JSON.stringify(existingData, null, 2));
 }
 
-// تشغيل السيرفر
 app.listen(PORT, () => {
     console.log(`✅ السيرفر يعمل على http://localhost:${PORT}`);
 });
