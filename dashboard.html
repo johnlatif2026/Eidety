@@ -19,17 +19,20 @@
   <div class="wrap">
     <h2>لوحة تحكم التحويلات</h2>
     <button class="btn" id="logoutBtn" style="margin-bottom:12px;">تسجيل الخروج</button>
-    <div id="content" class="muted">جارٍ التحميل...</div>
+    <div id="content" class="muted">جارٍ التحقق...</div>
   </div>
 
 <script>
 const content = document.getElementById('content');
 const logoutBtn = document.getElementById('logoutBtn');
+
+// الحصول على التوكن
 const token = localStorage.getItem('jwt');
 
-// إذا لم يكن هناك توكن، أعِد التوجيه مباشرة
+// إذا التوكن مش موجود، ارجع للصفحة الرئيسية
 if (!token) {
-  window.location.href = '/login';
+  content.innerHTML = '<p class="error">لم يتم تسجيل الدخول. سيتم إعادة التوجيه...</p>';
+  setTimeout(() => window.location.href = '/login', 2000);
 }
 
 // تسجيل الخروج
@@ -38,7 +41,7 @@ logoutBtn.addEventListener('click', () => {
   window.location.href = '/login';
 });
 
-// دالة الهروب من HTML لمنع XSS
+// دالة للهروب من HTML لمنع XSS
 function escapeHtml(s) {
   if (!s) return '';
   return String(s).replace(/[&<>"']/g, function(m){
@@ -46,9 +49,11 @@ function escapeHtml(s) {
   });
 }
 
-// تحميل البيانات من السيرفر
+// تحميل البيانات
 async function loadData() {
   content.textContent = 'جارٍ التحميل...';
+
+  if (!token) return; // تأكد من وجود توكن
 
   try {
     const res = await fetch('/dashboard/data', {
@@ -60,12 +65,14 @@ async function loadData() {
     });
 
     if (res.status === 401 || res.status === 403) {
-      content.innerHTML = '<p class="error">غير مسموح بالدخول. سيتم إعادة التوجيه إلى صفحة الدخول...</p>';
+      content.innerHTML = '<p class="error">التوكن غير صالح أو منتهي. سيتم إعادة التوجيه إلى صفحة الدخول...</p>';
+      localStorage.removeItem('jwt'); // إزالة التوكن الفاسد
       setTimeout(() => window.location.href = '/login', 2000);
       return;
     }
 
     const data = await res.json();
+
     if (!Array.isArray(data) || data.length === 0) {
       content.innerHTML = '<div>لا توجد تحويلات بعد.</div>';
       return;
