@@ -36,14 +36,14 @@
 
       try {
         const resp = await fetch('/api/login', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ username, password })
-});
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
 
         const data = await resp.json();
 
-        if (data.success) {
+        if (data.success && data.token) {
           localStorage.setItem('jwt', data.token);
           window.location.href = '/dashboard';
         } else {
