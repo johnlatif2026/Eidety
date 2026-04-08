@@ -1,7 +1,11 @@
+require('dotenv').config();
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const axios = require('axios');
+const jwt = require('jsonwebtoken');
+const fs = require('fs');
+const path = require('path');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -11,16 +15,36 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(express.static('public'));
 
-// Telegram Bot Token و Chat ID - ضع معلوماتك هنا
-const TELEGRAM_BOT_TOKEN = '8602765183:AAFv3ytqUaBO06eXePOzOINmGaC3JGUdvwc';
-const TELEGRAM_CHAT_ID = '5859857970';
+// قراءة إعدادات من .env
+const { ADMIN_USER, ADMIN_PASS, JWT_SECRET, TELEGRAM_TOKEN, TELEGRAM_CHAT_ID } = process.env;
 
-// مسار لاستقبال البيانات من الموقع
+// ===== Middleware للتحقق من JWT =====
+function authenticateToken(req, res, next) {
+    const token = req.headers['authorization']?.split(' ')[1];
+    if (!token) return res.status(401).json({ message: 'Unauthorized' });
+
+    jwt.verify(token, JWT_SECRET, (err, user) => {
+        if (err) return res.status(403).json({ message: 'Forbidden' });
+        req.user = user;
+        next();
+    });
+}
+
+// ===== مسار تسجيل الدخول =====
+app.post('/login', (req, res) => {
+    const { username, password } = req.body;
+    if (username === ADMIN_USER && password === ADMIN_PASS) {
+        const token = jwt.sign({ username }, JWT_SECRET, { expiresIn: '2h' });
+        res.json({ success: true, token });
+    } else {
+        res.status(401).json({ success: false, message: 'خطأ في اسم المستخدم أو كلمة المرور' });
+    }
+});
+
+// ===== مسار إرسال البيانات للتليجرام =====
 app.post('/send-to-telegram', async (req, res) => {
     try {
         const { username, gift, boxNumber, timestamp, ip } = req.body;
-        
-        // رسالة التليجرام
         const message = `
 🎄 *مفاجأة السنة الجديدة* 🎁
 
@@ -32,89 +56,47 @@ app.post('/send-to-telegram', async (req, res) => {
 
 ✅ تم اختيار الهدية بنجاح!
         `;
-        
-        // إرسال الرسالة إلى التليجرام
-        const telegramResponse = await axios.post(
-            `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`,
-            {
-                chat_id: TELEGRAM_CHAT_ID,
-                text: message,
-                parse_mode: 'Markdown'
-            }
-        );
-        
-        console.log('تم إرسال الرسالة إلى التليجرام');
-        
-        // حفظ البيانات في ملف (اختياري)
-        saveToFile({
-            username,
-            gift,
-            boxNumber,
-            timestamp,
-            ip,
-            telegramResponse: telegramResponse.data
+        await axios.post(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`, {
+            chat_id: TELEGRAM_CHAT_ID,
+            text: message,
+            parse_mode: 'Markdown'
         });
-        
-        res.json({ 
-            success: true, 
-            message: 'تم إرسال البيانات إلى التليجرام بنجاح' 
-        });
-        
+
+        saveToFile({ username, gift, boxNumber, timestamp, ip });
+        res.json({ success: true, message: 'تم إرسال البيانات إلى التليجرام بنجاح' });
     } catch (error) {
-        console.error('خطأ في إرسال البيانات:', error);
-        res.status(500).json({ 
-            success: false, 
-            message: 'خطأ في إرسال البيانات' 
-        });
+        console.error(error);
+        res.status(500).json({ success: false, message: 'خطأ في إرسال البيانات' });
     }
 });
 
-// مسار لعرض البيانات المحفوظة (للإدارة)
-app.get('/admin/data', (req, res) => {
-    const fs = require('fs');
+// ===== مسار عرض البيانات للوحة التحكم محمي بـ JWT =====
+app.get('/dashboard/data', authenticateToken, (req, res) => {
     try {
-        const data = fs.readFileSync('data.json', 'utf8');
-        const jsonData = JSON.parse(data);
-        res.json(jsonData);
-    } catch (error) {
+        const data = fs.readFileSync(path.join(__dirname, 'data.json'), 'utf8');
+        res.json(JSON.parse(data));
+    } catch (err) {
         res.json([]);
     }
 });
 
-// مسار رئيسي
-app.get('/', (req, res) => {
-    res.sendFile(__dirname + '/index.html');
-});
+// ===== صفحات ثابتة =====
+app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
+app.get('/login.html', (req, res) => res.sendFile(path.join(__dirname, 'login.html')));
+app.get('/dashboard.html', authenticateToken, (req, res) => res.sendFile(path.join(__dirname, 'dashboard.html')));
 
-app.get('/login', (req, res) => {
-    res.sendFile(__dirname + '/login.html');
-});
-
-// دالة لحفظ البيانات في ملف
+// ===== دالة حفظ البيانات =====
 function saveToFile(data) {
-    const fs = require('fs');
-    const path = require('path');
-    
     const filePath = path.join(__dirname, 'data.json');
     let existingData = [];
-    
     try {
-        const fileData = fs.readFileSync(filePath, 'utf8');
-        existingData = JSON.parse(fileData);
-    } catch (error) {
-        // إذا الملف مش موجود، نبدأ بمصفوفة فارغة
-    }
-    
-    existingData.push({
-        ...data,
-        savedAt: new Date().toISOString()
-    });
-    
+        existingData = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+    } catch (err) {}
+    existingData.push({ ...data, savedAt: new Date().toISOString() });
     fs.writeFileSync(filePath, JSON.stringify(existingData, null, 2));
 }
 
 // تشغيل السيرفر
 app.listen(PORT, () => {
     console.log(`✅ السيرفر يعمل على http://localhost:${PORT}`);
-    console.log(`📱 أرسل البيانات إلى: http://localhost:${PORT}/send-to-telegram`);
 });
