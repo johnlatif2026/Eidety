@@ -1,0 +1,20 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "server.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    { "src": "/(.*)", "dest": "server.js" }
+  ],
+  "env": {
+    "ADMIN_USER": "@admin_user",
+    "ADMIN_PASS": "@admin_pass",
+    "JWT_SECRET": "@jwt_secret",
+    "TELEGRAM_TOKEN": "@telegram_token",
+    "TELEGRAM_CHAT_ID": "@telegram_chat_id",
+    "PORT": "3000"
+  }
+}
