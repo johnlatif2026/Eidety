@@ -41,7 +41,7 @@
     body: JSON.stringify({ username, password })
 });
 
-        const data = await res.json();
+        const data = await resp.json();
 
         if (data.success) {
           localStorage.setItem('jwt', data.token);
