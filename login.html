@@ -43,7 +43,7 @@ loginBtn.addEventListener('click', async () => {
 
     const data = await resp.json();
     if (data.success && data.token) {
-      localStorage.setItem('jwt', data.token);
+      localStorage.getItem('jwt', data.token);
       window.location.href = '/dashboard';
     } else {
       msg.textContent = data.message || 'خطأ في الدخول';
