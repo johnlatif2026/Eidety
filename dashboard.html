@@ -13,6 +13,7 @@
     input{padding:8px;border-radius:6px;border:1px solid #ddd}
     .btn{padding:8px 12px;border-radius:6px;border:none;background:#0b6efd;color:#fff;cursor:pointer}
     .muted{color:#666}
+    p.error{color:red;}
   </style>
 </head>
 <body dir="rtl">
@@ -23,28 +24,32 @@
   </div>
 
 <script>
-  // ===== حماية الصفحة بالـ JWT =====
   const token = localStorage.getItem('jwt');
-  if (!token) {
-    window.location.href = '/login';
-  }
-
   const content = document.getElementById('content');
   const logoutBtn = document.getElementById('logoutBtn');
 
-  // تسجيل الخروج
+  if (!token) {
+    content.innerHTML = '<p class="error">لم يتم تسجيل الدخول. يرجى العودة إلى <a href="/login">صفحة الدخول</a>.</p>';
+  }
+
   logoutBtn.addEventListener('click', () => {
     localStorage.removeItem('jwt');
     window.location.href = '/login';
   });
 
-  // تحميل البيانات من السيرفر
   async function loadData() {
+    if (!token) return;
+
     content.textContent = 'جارٍ التحميل...';
     try {
       const res = await fetch('/dashboard/data', {
         headers: { 'Authorization': 'Bearer ' + token }
       });
+
+      if (res.status === 401 || res.status === 403) {
+        content.innerHTML = '<p class="error">لا تملك صلاحية الدخول. يرجى تسجيل الدخول مجددًا.</p>';
+        return;
+      }
 
       const data = await res.json();
       if (!Array.isArray(data) || data.length === 0) {
