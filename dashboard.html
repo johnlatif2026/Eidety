@@ -1,7 +1,7 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ar">
 <head>
-  <meta charset="utf-8" />
+  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Dashboard</title>
   <style>
@@ -10,65 +10,72 @@
     table{width:100%;border-collapse:collapse;background:#fff;border-radius:8px;overflow:hidden}
     th,td{padding:10px;border-bottom:1px solid #eee;text-align:right}
     th{background:#f0f6ff}
+    input{padding:8px;border-radius:6px;border:1px solid #ddd}
     .btn{padding:8px 12px;border-radius:6px;border:none;background:#0b6efd;color:#fff;cursor:pointer}
     .muted{color:#666}
   </style>
-  <script>
-    // حماية الصفحة بالـ JWT
-    const token = localStorage.getItem('jwt');
-    if (!token) {
-      window.location.href = '/login.html';
-    }
-  </script>
 </head>
 <body dir="rtl">
   <div class="wrap">
     <h2>لوحة تحكم التحويلات</h2>
-    <div style="margin-bottom:12px">
-      <button class="btn" id="loadBtn">تحميل التحويلات</button>
-    </div>
-
-    <div id="content" class="muted">لم يتم تحميل أي شيء بعد.</div>
+    <button class="btn" id="logoutBtn" style="margin-bottom:12px;">تسجيل الخروج</button>
+    <div id="content" class="muted">جارٍ التحميل...</div>
   </div>
 
 <script>
-  const loadBtn = document.getElementById('loadBtn');
-  const content = document.getElementById('content');
+  // ===== حماية الصفحة بالـ JWT =====
+  const token = localStorage.getItem('jwt');
+  if (!token) {
+    window.location.href = '/login';
+  }
 
-  loadBtn.addEventListener('click', async () => {
+  const content = document.getElementById('content');
+  const logoutBtn = document.getElementById('logoutBtn');
+
+  // تسجيل الخروج
+  logoutBtn.addEventListener('click', () => {
+    localStorage.removeItem('jwt');
+    window.location.href = '/login';
+  });
+
+  // تحميل البيانات من السيرفر
+  async function loadData() {
     content.textContent = 'جارٍ التحميل...';
     try {
-      const resp = await fetch('/transfers', {
-        headers: {
-          'Authorization': 'Bearer ' + localStorage.getItem('jwt')
-        }
+      const res = await fetch('/dashboard/data', {
+        headers: { 'Authorization': 'Bearer ' + token }
       });
-      const data = await resp.json();
-      if (!data.ok) {
-        content.textContent = 'خطأ: ' + (data.message || 'unauthorized');
-        return;
-      }
-      const transfers = data.transfers || [];
-      if (transfers.length === 0) {
+
+      const data = await res.json();
+      if (!Array.isArray(data) || data.length === 0) {
         content.innerHTML = '<div>لا توجد تحويلات بعد.</div>';
         return;
       }
 
-      let html = '<table><thead><tr><th>#</th><th>المبلغ</th><th>المرسل</th><th>ملاحظة</th><th>الوقت</th></tr></thead><tbody>';
-      transfers.forEach(t => {
-        html += `<tr><td>${t.id}</td><td>${t.amount}</td><td>${escapeHtml(t.payerName)}</td><td>${escapeHtml(t.note)}</td><td>${t.timestamp}</td></tr>`;
+      let html = '<table><thead><tr><th>#</th><th>اسم المستخدم</th><th>الهدية</th><th>رقم الصندوق</th><th>الوقت</th></tr></thead><tbody>';
+      data.forEach((t, i) => {
+        html += `<tr>
+          <td>${i+1}</td>
+          <td>${escapeHtml(t.username)}</td>
+          <td>${escapeHtml(t.gift)}</td>
+          <td>${escapeHtml(t.boxNumber)}</td>
+          <td>${new Date(t.savedAt).toLocaleString('ar-EG')}</td>
+        </tr>`;
       });
       html += '</tbody></table>';
       content.innerHTML = html;
+
     } catch (err) {
-      content.textContent = 'فشل الاتصال بالخادم.';
+      content.textContent = 'فشل الاتصال بالخادم';
     }
-  });
+  }
 
   function escapeHtml(s) {
     if (!s) return '';
     return String(s).replace(/[&<>"']/g, function(m){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m]; });
   }
+
+  loadData();
 </script>
 </body>
 </html>
