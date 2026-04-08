@@ -284,25 +284,32 @@
                 font-size: 2.8rem;
             }
         }
+        .logo {
+    width: 120px;
+    margin: 15px auto;
+    display: block;
+    border-radius: 12px;
+}
     </style>
 </head>
 <body>
     <div class="container" id="username-container">
-        <h1>Eidety | عيديتي</h1>
-        <h2>اختر هديتك</h2>
-        <div class="container">
+<div class="container" id="username-container">
+    <h1>Eidety | عيديتي</h1>
+    <h2>اختر هديتك</h2>
 
-<img class="logo" src="https://i.postimg.cc/Nj83FS93/Eidety.jpg">
+    <img class="logo" src="https://i.postimg.cc/Nj83FS93/Eidety.jpg">
 
-<h2>خريستوس انيستي</h2>
-<h3>Χριστός ἀνέστη</h3>
-        <div class="input-group">
-            <input type="text" id="username" placeholder="اكتب اسمك هنا" />
-            <button class="btn" onclick="start()">دخول إلى المفاجأة</button>
-        </div>
-        
-        <div class="alert error" id="error-alert">من فضلك اكتب اسمك أولاً</div>
+    <h2>خريستوس انيستي</h2>
+    <h3>Χριστός ἀνέστη</h3>
+
+    <div class="input-group">
+        <input type="text" id="username" placeholder="اكتب اسمك هنا" />
+        <button class="btn" onclick="start()">دخول إلى المفاجأة</button>
     </div>
+
+    <div class="alert error" id="error-alert">من فضلك اكتب اسمك أولاً</div>
+</div>
 
     <div class="container" id="gift-container" style="display: none;">
         <h1>اختر عديتك</h1>
