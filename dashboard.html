@@ -10,7 +10,6 @@
     table{width:100%;border-collapse:collapse;background:#fff;border-radius:8px;overflow:hidden}
     th,td{padding:10px;border-bottom:1px solid #eee;text-align:right}
     th{background:#f0f6ff}
-    input{padding:8px;border-radius:6px;border:1px solid #ddd}
     .btn{padding:8px 12px;border-radius:6px;border:none;background:#0b6efd;color:#fff;cursor:pointer}
     .muted{color:#666}
     p.error{color:red;}
@@ -24,36 +23,49 @@
   </div>
 
 <script>
-  const token = localStorage.getItem('jwt');
-if (!token) {
-  window.location.href = '/login';
-};
   const content = document.getElementById('content');
   const logoutBtn = document.getElementById('logoutBtn');
+  const token = localStorage.getItem('jwt');
 
+  // إذا لم يكن هناك توكن، أعد توجيه المستخدم إلى صفحة الدخول
   if (!token) {
-    content.innerHTML = '<p class="error">لم يتم تسجيل الدخول. يرجى العودة إلى <a href="/login">صفحة الدخول</a>.</p>';
+    window.location.href = '/login';
   }
 
+  // تسجيل الخروج
   logoutBtn.addEventListener('click', () => {
     localStorage.removeItem('jwt');
     window.location.href = '/login';
   });
 
-  async function loadData() {
-    if (!token) return;
+  // دالة الهروب من HTML لمنع XSS
+  function escapeHtml(s) {
+    if (!s) return '';
+    return String(s).replace(/[&<>"']/g, function(m){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m];
+    });
+  }
 
+  // تحميل البيانات من السيرفر
+  async function loadData() {
     content.textContent = 'جارٍ التحميل...';
+
     try {
       const res = await fetch('/dashboard/data', {
-  headers: { 'Authorization': 'Bearer ' + token }
-});
+        method: 'GET',
+        headers: new Headers({
+          'Authorization': 'Bearer ' + token,
+          'Content-Type': 'application/json'
+        })
+      });
+
       if (res.status === 401 || res.status === 403) {
         content.innerHTML = '<p class="error">لا تملك صلاحية الدخول. يرجى تسجيل الدخول مجددًا.</p>';
         return;
       }
 
       const data = await res.json();
+
       if (!Array.isArray(data) || data.length === 0) {
         content.innerHTML = '<div>لا توجد تحويلات بعد.</div>';
         return;
@@ -75,11 +87,6 @@ if (!token) {
     } catch (err) {
       content.textContent = 'فشل الاتصال بالخادم';
     }
-  }
-
-  function escapeHtml(s) {
-    if (!s) return '';
-    return String(s).replace(/[&<>"']/g, function(m){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m]; });
   }
 
   loadData();
