@@ -3,24 +3,28 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Dashboard - Merry Christmas</title>
+  <title>Dashboard</title>
   <style>
     body{font-family:Arial, "Noto Sans Arabic", sans-serif;padding:20px;background:#f7f9ff}
     .wrap{max-width:900px;margin:0 auto}
     table{width:100%;border-collapse:collapse;background:#fff;border-radius:8px;overflow:hidden}
     th,td{padding:10px;border-bottom:1px solid #eee;text-align:right}
     th{background:#f0f6ff}
-    input{padding:8px;border-radius:6px;border:1px solid #ddd}
     .btn{padding:8px 12px;border-radius:6px;border:none;background:#0b6efd;color:#fff;cursor:pointer}
     .muted{color:#666}
   </style>
+  <script>
+    // حماية الصفحة بالـ JWT
+    const token = localStorage.getItem('jwt');
+    if (!token) {
+      window.location.href = '/login.html';
+    }
+  </script>
 </head>
 <body dir="rtl">
   <div class="wrap">
     <h2>لوحة تحكم التحويلات</h2>
     <div style="margin-bottom:12px">
-      <label>ادخل Admin Token: </label>
-      <input id="adminToken" placeholder="ADMIN_TOKEN" style="width:300px" />
       <button class="btn" id="loadBtn">تحميل التحويلات</button>
     </div>
 
@@ -29,15 +33,16 @@
 
 <script>
   const loadBtn = document.getElementById('loadBtn');
-  const adminTokenInput = document.getElementById('adminToken');
   const content = document.getElementById('content');
 
   loadBtn.addEventListener('click', async () => {
-    const token = adminTokenInput.value.trim();
-    if (!token) return alert('أدخل الـ ADMIN_TOKEN أولًا');
     content.textContent = 'جارٍ التحميل...';
     try {
-      const resp = await fetch('/transfers?admin_token=' + encodeURIComponent(token));
+      const resp = await fetch('/transfers', {
+        headers: {
+          'Authorization': 'Bearer ' + localStorage.getItem('jwt')
+        }
+      });
       const data = await resp.json();
       if (!data.ok) {
         content.textContent = 'خطأ: ' + (data.message || 'unauthorized');
