@@ -17,11 +17,13 @@ app.use(express.static('public'));
 const { ADMIN_USER, ADMIN_PASS, JWT_SECRET, TELEGRAM_TOKEN, TELEGRAM_CHAT_ID } = process.env;
 
 function authenticateToken(req, res, next) {
-    const token = req.headers['authorization']?.split(' ')[1];
-    if (!token) return res.status(401).json({ message: 'Unauthorized' });
+    const authHeader = req.headers['authorization'];
+    console.log('Authorization header:', authHeader); // للتصحيح
+    const token = authHeader?.split(' ')[1];
+    if (!token) return res.status(401).json({ message: 'Unauthorized - no token' });
 
     jwt.verify(token, JWT_SECRET, (err, user) => {
-        if (err) return res.status(403).json({ message: 'Forbidden' });
+        if (err) return res.status(403).json({ message: 'Forbidden - invalid token' });
         req.user = user;
         next();
     });
