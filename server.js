@@ -18,7 +18,6 @@ const { ADMIN_USER, ADMIN_PASS, JWT_SECRET, TELEGRAM_TOKEN, TELEGRAM_CHAT_ID } =
 
 function authenticateToken(req, res, next) {
     const authHeader = req.headers['authorization'];
-    console.log('Authorization header:', authHeader); // للتصحيح
     const token = authHeader?.split(' ')[1];
     if (!token) return res.status(401).json({ message: 'Unauthorized - no token' });
 
@@ -40,34 +39,6 @@ app.post('/api/login', (req, res) => {
     res.status(401).json({ success: false, message: 'خطأ في اسم المستخدم أو كلمة المرور' });
 });
 
-app.post('/send-to-telegram', async (req, res) => {
-    try {
-        const { username, gift, boxNumber, timestamp, ip } = req.body;
-        const message = `
-🎄 *مفاجأة السنة الجديدة* 🎁
-
-👤 *اسم المستخدم:* ${username}
-🎁 *الهدية المختارة:* ${gift}
-🔢 *رقم الصندوق:* ${boxNumber}
-⏰ *الوقت:* ${new Date(timestamp).toLocaleString('ar-EG')}
-🌐 *عنوان IP:* ${ip}
-
-✅ تم اختيار الهدية بنجاح!
-        `;
-        await axios.post(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`, {
-            chat_id: TELEGRAM_CHAT_ID,
-            text: message,
-            parse_mode: 'Markdown'
-        });
-
-        saveToFile({ username, gift, boxNumber, timestamp, ip });
-        res.json({ success: true, message: 'تم إرسال البيانات إلى التليجرام بنجاح' });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ success: false, message: 'خطأ في إرسال البيانات' });
-    }
-});
-
 app.get('/dashboard/data', authenticateToken, (req, res) => {
     try {
         const data = fs.readFileSync(path.join(__dirname, 'data.json'), 'utf8');
@@ -77,7 +48,6 @@ app.get('/dashboard/data', authenticateToken, (req, res) => {
     }
 });
 
-app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
 app.get('/login', (req, res) => res.sendFile(path.join(__dirname, 'login.html')));
 app.get('/dashboard', authenticateToken, (req, res) => res.sendFile(path.join(__dirname, 'dashboard.html')));
 
