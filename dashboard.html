@@ -25,6 +25,9 @@
 
 <script>
   const token = localStorage.getItem('jwt');
+if (!token) {
+  window.location.href = '/login';
+};
   const content = document.getElementById('content');
   const logoutBtn = document.getElementById('logoutBtn');
 
