@@ -82,8 +82,8 @@ app.get('/dashboard/data', authenticateToken, (req, res) => {
 
 // ===== صفحات ثابتة =====
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
-app.get('/login.html', (req, res) => res.sendFile(path.join(__dirname, 'login.html')));
-app.get('/dashboard.html', authenticateToken, (req, res) => res.sendFile(path.join(__dirname, 'dashboard.html')));
+app.get('/login', (req, res) => res.sendFile(path.join(__dirname, 'login.html')));
+app.get('/dashboard', authenticateToken, (req, res) => res.sendFile(path.join(__dirname, 'dashboard.html')));
 
 // ===== دالة حفظ البيانات =====
 function saveToFile(data) {
