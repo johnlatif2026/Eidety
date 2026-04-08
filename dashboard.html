@@ -1,102 +1,65 @@
 <!DOCTYPE html>
 <html lang="ar">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Dashboard</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>تسجيل الدخول</title>
   <style>
-    body{font-family:Arial, "Noto Sans Arabic", sans-serif;padding:20px;background:#f7f9ff}
-    .wrap{max-width:900px;margin:0 auto}
-    table{width:100%;border-collapse:collapse;background:#fff;border-radius:8px;overflow:hidden}
-    th,td{padding:10px;border-bottom:1px solid #eee;text-align:right}
-    th{background:#f0f6ff}
-    .btn{padding:8px 12px;border-radius:6px;border:none;background:#0b6efd;color:#fff;cursor:pointer}
-    .muted{color:#666}
-    p.error{color:red;}
+    body { font-family: Arial, "Noto Sans Arabic", sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background: #f7f9ff; }
+    .login-box { background: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); width: 300px; }
+    input { width: 100%; padding: 10px; margin: 10px 0; border-radius: 6px; border: 1px solid #ccc; }
+    button { padding: 10px; width: 100%; border: none; border-radius: 6px; background: #0b6efd; color: #fff; cursor: pointer; }
+    p { color: red; font-size: 0.9em; }
   </style>
 </head>
-<body dir="rtl">
-  <div class="wrap">
-    <h2>لوحة تحكم التحويلات</h2>
-    <button class="btn" id="logoutBtn" style="margin-bottom:12px;">تسجيل الخروج</button>
-    <div id="content" class="muted">جارٍ التحقق...</div>
+<body>
+  <div class="login-box">
+    <h2>تسجيل الدخول</h2>
+    <input id="username" placeholder="اسم المستخدم">
+    <input id="password" type="password" placeholder="كلمة المرور">
+    <button id="loginBtn">دخول</button>
+    <p id="msg"></p>
   </div>
 
 <script>
-const content = document.getElementById('content');
-const logoutBtn = document.getElementById('logoutBtn');
+const loginBtn = document.getElementById('loginBtn');
+const msg = document.getElementById('msg');
 
-// الحصول على التوكن
-const token = localStorage.getItem('jwt');
+loginBtn.addEventListener('click', async () => {
+  msg.textContent = '';
+  const username = document.getElementById('username').value.trim();
+  const password = document.getElementById('password').value.trim();
 
-// إذا التوكن مش موجود، ارجع للصفحة الرئيسية
-if (!token) {
-  content.innerHTML = '<p class="error">لم يتم تسجيل الدخول. سيتم إعادة التوجيه...</p>';
-  setTimeout(() => window.location.href = '/login', 2000);
-}
-
-// تسجيل الخروج
-logoutBtn.addEventListener('click', () => {
-  localStorage.removeItem('jwt');
-  window.location.href = '/login';
-});
-
-// دالة للهروب من HTML لمنع XSS
-function escapeHtml(s) {
-  if (!s) return '';
-  return String(s).replace(/[&<>"']/g, function(m){
-    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m];
-  });
-}
-
-// تحميل البيانات
-async function loadData() {
-  content.textContent = 'جارٍ التحميل...';
-
-  if (!token) return; // تأكد من وجود توكن
+  if (!username || !password) {
+    msg.textContent = 'ادخل اسم المستخدم وكلمة المرور';
+    return;
+  }
 
   try {
-    const res = await fetch('/dashboard/data', {
-      method: 'GET',
-      headers: {
-        'Authorization': 'Bearer ' + token,
-        'Content-Type': 'application/json'
-      }
+    const resp = await fetch('/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password })
     });
 
-    if (res.status === 401 || res.status === 403) {
-      content.innerHTML = '<p class="error">التوكن غير صالح أو منتهي. سيتم إعادة التوجيه إلى صفحة الدخول...</p>';
-      localStorage.removeItem('jwt'); // إزالة التوكن الفاسد
-      setTimeout(() => window.location.href = '/login', 2000);
+    if (!resp.ok) {
+      msg.textContent = 'خطأ في الاتصال بالخادم أو بيانات غير صحيحة';
       return;
     }
 
-    const data = await res.json();
+    const data = await resp.json();
 
-    if (!Array.isArray(data) || data.length === 0) {
-      content.innerHTML = '<div>لا توجد تحويلات بعد.</div>';
-      return;
+    if (data.success && data.token) {
+      // تأكد من أن التوكن موجود قبل تخزينه
+      localStorage.setItem('jwt', data.token);
+      window.location.href = '/dashboard';
+    } else {
+      msg.textContent = data.message || 'خطأ في الدخول';
     }
-
-    let html = '<table><thead><tr><th>#</th><th>اسم المستخدم</th><th>الهدية</th><th>رقم الصندوق</th><th>الوقت</th></tr></thead><tbody>';
-    data.forEach((t, i) => {
-      html += `<tr>
-        <td>${i+1}</td>
-        <td>${escapeHtml(t.username)}</td>
-        <td>${escapeHtml(t.gift)}</td>
-        <td>${escapeHtml(t.boxNumber)}</td>
-        <td>${new Date(t.savedAt).toLocaleString('ar-EG')}</td>
-      </tr>`;
-    });
-    html += '</tbody></table>';
-    content.innerHTML = html;
-
   } catch (err) {
-    content.textContent = 'فشل الاتصال بالخادم';
+    msg.textContent = 'فشل الاتصال بالخادم';
   }
-}
-
-loadData();
+});
 </script>
 </body>
 </html>
