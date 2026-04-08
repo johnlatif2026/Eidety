@@ -31,14 +31,15 @@ function authenticateToken(req, res, next) {
 }
 
 // ===== مسار تسجيل الدخول =====
-app.post('/login', (req, res) => {
+app.post('/api/login', (req, res) => {
     const { username, password } = req.body;
+
     if (username === ADMIN_USER && password === ADMIN_PASS) {
         const token = jwt.sign({ username }, JWT_SECRET, { expiresIn: '2h' });
-        res.json({ success: true, token });
-    } else {
-        res.status(401).json({ success: false, message: 'خطأ في اسم المستخدم أو كلمة المرور' });
+        return res.json({ success: true, token });
     }
+
+    res.status(401).json({ success: false, message: 'خطأ في اسم المستخدم أو كلمة المرور' });
 });
 
 // ===== مسار إرسال البيانات للتليجرام =====
@@ -81,8 +82,8 @@ app.get('/dashboard/data', authenticateToken, (req, res) => {
 });
 
 // ===== صفحات ثابتة =====
-app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
-app.get('/login', (req, res) => res.sendFile(path.join(__dirname, 'login.html')));
+app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));app.get('/login', (req, res) => {
+app.get('/login', (req, res) => {res.sendFile(path.join(__dirname, 'login.html'));});
 app.get('/dashboard', authenticateToken, (req, res) => res.sendFile(path.join(__dirname, 'dashboard.html')));
 
 // ===== دالة حفظ البيانات =====
