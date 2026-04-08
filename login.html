@@ -1,99 +1,58 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Login | إدارة المفاجآت</title>
-<style>
-    body {
-        background: #0f172a;
-        color: #f1f5f9;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-        font-family: 'Segoe UI', sans-serif;
-    }
-    .login-container {
-        background: rgba(30,41,59,0.9);
-        padding: 40px;
-        border-radius: 16px;
-        text-align: center;
-        width: 300px;
-    }
-    input {
-        width: 100%;
-        padding: 12px;
-        margin: 10px 0;
-        border-radius: 8px;
-        border: 1px solid #60a5fa;
-        background: #1e293b;
-        color: #f1f5f9;
-    }
-    button {
-        width: 100%;
-        padding: 12px;
-        background: #60a5fa;
-        color: #1e293b;
-        border: none;
-        border-radius: 8px;
-        font-weight: bold;
-        cursor: pointer;
-    }
-    .alert {
-        margin-top: 15px;
-        color: #f87171;
-        display: none;
-    }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>تسجيل الدخول</title>
+  <style>
+    body { font-family: Arial, "Noto Sans Arabic", sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background: #f7f9ff; }
+    .login-box { background: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); width: 300px; }
+    input { width: 100%; padding: 10px; margin: 10px 0; border-radius: 6px; border: 1px solid #ccc; }
+    button { padding: 10px; width: 100%; border: none; border-radius: 6px; background: #0b6efd; color: #fff; cursor: pointer; }
+    p { color: red; font-size: 0.9em; }
+  </style>
 </head>
 <body>
-
-<div class="login-container">
+  <div class="login-box">
     <h2>تسجيل الدخول</h2>
-    <input type="text" id="username" placeholder="اسم المستخدم">
-    <input type="password" id="password" placeholder="كلمة المرور">
-    <button onclick="login()">دخول</button>
-    <div class="alert" id="error">اسم المستخدم أو كلمة المرور خطأ!</div>
-</div>
+    <input id="username" placeholder="اسم المستخدم">
+    <input id="password" type="password" placeholder="كلمة المرور">
+    <button id="loginBtn">دخول</button>
+    <p id="msg"></p>
+  </div>
 
-<script>
-async function login() {
-    const username = document.getElementById('username').value.trim();
-    const password = document.getElementById('password').value.trim();
-    const errorDiv = document.getElementById('error');
+  <script>
+    const loginBtn = document.getElementById('loginBtn');
+    const msg = document.getElementById('msg');
 
-    if (!username || !password) {
-        errorDiv.textContent = 'من فضلك املأ جميع الحقول';
-        errorDiv.style.display = 'block';
+    loginBtn.addEventListener('click', async () => {
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value.trim();
+
+      if (!username || !password) {
+        msg.textContent = 'ادخل اسم المستخدم وكلمة المرور';
         return;
-    }
+      }
 
-    try {
+      try {
         const res = await fetch('/api/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, password })
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
         });
 
         const data = await res.json();
 
-        if (res.ok && data.token) {
-            // حفظ التوكن في localStorage
-            localStorage.setItem('jwt', data.token);
-            window.location.href = '/dashboard';
+        if (data.success) {
+          localStorage.setItem('jwt', data.token);
+          window.location.href = '/dashboard';
         } else {
-            errorDiv.textContent = data.message || 'فشل تسجيل الدخول';
-            errorDiv.style.display = 'block';
+          msg.textContent = data.message || 'خطأ في الدخول';
         }
-
-    } catch (err) {
-        errorDiv.textContent = 'حدث خطأ، حاول مرة أخرى';
-        errorDiv.style.display = 'block';
-        console.error(err);
-    }
-}
-</script>
-
+      } catch (err) {
+        msg.textContent = 'فشل الاتصال بالخادم';
+      }
+    });
+  </script>
 </body>
 </html>
