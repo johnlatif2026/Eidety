@@ -43,9 +43,8 @@
     content.textContent = 'جارٍ التحميل...';
     try {
       const res = await fetch('/dashboard/data', {
-        headers: { 'Authorization': 'Bearer ' + token }
-      });
-
+  headers: { 'Authorization': 'Bearer ' + token }
+});
       if (res.status === 401 || res.status === 403) {
         content.innerHTML = '<p class="error">لا تملك صلاحية الدخول. يرجى تسجيل الدخول مجددًا.</p>';
         return;
