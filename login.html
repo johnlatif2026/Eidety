@@ -21,38 +21,37 @@
     <p id="msg"></p>
   </div>
 
-  <script>
-    const loginBtn = document.getElementById('loginBtn');
-    const msg = document.getElementById('msg');
+<script>
+const loginBtn = document.getElementById('loginBtn');
+const msg = document.getElementById('msg');
 
-    loginBtn.addEventListener('click', async () => {
-      const username = document.getElementById('username').value.trim();
-      const password = document.getElementById('password').value.trim();
+loginBtn.addEventListener('click', async () => {
+  const username = document.getElementById('username').value.trim();
+  const password = document.getElementById('password').value.trim();
 
-      if (!username || !password) {
-        msg.textContent = 'ادخل اسم المستخدم وكلمة المرور';
-        return;
-      }
+  if (!username || !password) {
+    msg.textContent = 'ادخل اسم المستخدم وكلمة المرور';
+    return;
+  }
 
-      try {
-        const resp = await fetch('/api/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username, password })
-        });
-
-        const data = await resp.json();
-
-        if (data.success && data.token) {
-          localStorage.setItem('jwt', data.token);
-          window.location.href = '/dashboard';
-        } else {
-          msg.textContent = data.message || 'خطأ في الدخول';
-        }
-      } catch (err) {
-        msg.textContent = 'فشل الاتصال بالخادم';
-      }
+  try {
+    const resp = await fetch('/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password })
     });
-  </script>
+
+    const data = await resp.json();
+    if (data.success && data.token) {
+      localStorage.setItem('jwt', data.token);
+      window.location.href = '/dashboard';
+    } else {
+      msg.textContent = data.message || 'خطأ في الدخول';
+    }
+  } catch (err) {
+    msg.textContent = 'فشل الاتصال بالخادم';
+  }
+});
+</script>
 </body>
 </html>
