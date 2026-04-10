@@ -38,7 +38,10 @@ function authenticateToken(req, res, next) {
 app.post('/send-to-telegram', async (req, res) => {
     try {
         const { username, gift, boxNumber, timestamp, ip } = req.body;
+        const data = req.body;
 
+        saveToFile(data);
+        
         const message = `
 🎁 New Gift Selection
 👤 Name: ${username}
