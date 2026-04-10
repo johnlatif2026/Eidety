@@ -419,22 +419,6 @@
         // إذا لم يكن هناك توكن نعيد التوجيه إلى صفحة الدخول (محاكاة)
         window.location.href = '/login';
     }
-
-async function toggleOverride() {
-    const res = await fetch('/api/site-toggle', {
-        method: 'POST',
-        headers: {
-            'Authorization': 'Bearer ' + token,
-            'Content-Type': 'application/json'
-        }
-    });
-
-    const data = await res.json();
-
-    if (data.success) {
-        showModernToast(data.open ? "🔓 Opened for everyone" : "🔒 Closed for everyone");
-    }
-}
    
     // عناصر DOM
     const giftsContainer = document.getElementById('dynamicGiftsArea');
