@@ -2,84 +2,133 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Dashboard</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+
 <style>
+* {
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Cairo', sans-serif;
+}
+
 body {
     background:#0f172a;
     color:white;
-    font-family:Arial;
+}
+
+header {
     padding:20px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    background:#111827;
+    position:sticky;
+    top:0;
 }
-.container {
-    max-width:800px;
-    margin:auto;
-}
-.card {
-    background:#1e293b;
-    padding:15px;
-    margin:10px 0;
-    border-radius:10px;
-}
+
 button {
-    padding:10px;
+    background:#ef4444;
     border:none;
-    background:red;
+    padding:10px 15px;
     color:white;
-    border-radius:8px;
+    border-radius:10px;
     cursor:pointer;
 }
+
+.container {
+    padding:20px;
+    max-width:900px;
+    margin:auto;
+}
+
+.card {
+    background:rgba(255,255,255,0.05);
+    border:1px solid rgba(255,255,255,0.1);
+    padding:15px;
+    margin:10px 0;
+    border-radius:15px;
+    transition:0.3s;
+}
+
+.card:hover {
+    transform:scale(1.02);
+    background:rgba(255,255,255,0.08);
+}
+
+.badge {
+    display:inline-block;
+    padding:5px 10px;
+    background:#f59e0b;
+    border-radius:8px;
+    font-size:12px;
+    margin-top:5px;
+}
+
 </style>
 </head>
+
 <body>
 
-<div class="container">
-    <h1>Dashboard</h1>
+<header>
+    <h3>📊 Dashboard Live</h3>
     <button onclick="logout()">Logout</button>
+</header>
 
-    <div id="data"></div>
-</div>
+<div class="container" id="data"></div>
 
 <script>
 
 const token = localStorage.getItem('token');
 
-// حماية الصفحة
-if (!token) {
+if(!token){
     window.location.href = '/login';
 }
 
-// تحميل البيانات
-async function loadData() {
-    const res = await fetch('/dashboard/data', {
-        headers: {
-            'Authorization': 'Bearer ' + token
+async function fetchData(){
+    try {
+        const res = await fetch('/dashboard/data', {
+            headers:{
+                'Authorization':'Bearer ' + token
+            }
+        });
+
+        if(res.status === 401 || res.status === 403){
+            localStorage.removeItem('token');
+            window.location.href = '/login';
+            return;
         }
-    });
 
-    if (res.status === 401 || res.status === 403) {
-        localStorage.removeItem('token');
-        window.location.href = '/login';
-        return;
-    }
+        const data = await res.json();
 
-    const data = await res.json();
-
-    document.getElementById('data').innerHTML =
-        data.map(item => `
+        document.getElementById('data').innerHTML =
+        data.reverse().map(item => `
             <div class="card">
-                <div>👤 ${item.username || 'unknown'}</div>
+                <div>👤 <b>${item.username || 'Unknown'}</b></div>
                 <div>🎁 ${item.gift || ''}</div>
-                <div>🕒 ${item.savedAt || ''}</div>
+                <div class="badge">🕒 ${new Date(item.savedAt).toLocaleString()}</div>
             </div>
         `).join('');
+
+    } catch(err){
+        console.log('error loading data');
+    }
 }
 
-function logout() {
+function logout(){
     localStorage.removeItem('token');
     window.location.href = '/login';
 }
 
-loadData();
+// أول تحميل
+fetchData();
+
+// 🔥 Live refresh كل 3 ثواني
+setInterval(fetchData, 3000);
+
 </script>
 
 </body>
