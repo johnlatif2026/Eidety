@@ -425,10 +425,10 @@ function toggleOverride() {
 
     if (current) {
         localStorage.removeItem("override_open");
-        showModernToast("🔒 تم تفعيل القفل");
+        showModernToast("🔒 The site has been activated");
     } else {
         localStorage.setItem("override_open", "true");
-        showModernToast("🔓 تم فتح الموقع يدوياً");
+        showModernToast("🔓 The site was opened manually");
     }
 
     setTimeout(() => {
