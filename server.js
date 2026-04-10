@@ -4,8 +4,10 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const axios = require('axios');
 const jwt = require('jsonwebtoken');
-const fs = require('fs');
 const path = require('path');
+
+// 🔥 Firebase Admin
+const admin = require('firebase-admin');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -14,41 +16,80 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(express.static('public'));
 
-const { ADMIN_USER, ADMIN_PASS, JWT_SECRET, TELEGRAM_TOKEN, TELEGRAM_CHAT_ID } = process.env;
+// ENV
+const { 
+  ADMIN_USER, 
+  ADMIN_PASS, 
+  JWT_SECRET, 
+  TELEGRAM_TOKEN, 
+  TELEGRAM_CHAT_ID,
+  FIREBASE_KEY
+} = process.env;
 
 
-console.log("JWT_SECRET =", JWT_SECRET);
+// 🔥 Firebase Init من .env
+let serviceAccount;
 
+try {
+    serviceAccount = JSON.parse(FIREBASE_KEY);
+
+    // إصلاح مشكلة private key
+    serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, '\n');
+
+} catch (err) {
+    console.error("❌ Firebase JSON Error:", err.message);
+    process.exit(1);
+}
+
+admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount)
+});
+
+const db = admin.firestore();
+
+console.log("✅ Firebase Connected");
+
+
+// 🔐 Middleware
 function authenticateToken(req, res, next) {
     const authHeader = req.headers['authorization'];
     const token = authHeader?.split(' ')[1];
 
-    console.log("AUTH HEADER =", authHeader);
-    console.log("TOKEN =", token);
-
-    if (!token) return res.status(401).json({ message: 'Unauthorized - no token' });
+    if (!token) return res.status(401).json({ message: 'Unauthorized' });
 
     jwt.verify(token, JWT_SECRET, (err, user) => {
-        if (err) return res.status(403).json({ message: 'Forbidden - invalid token' });
+        if (err) return res.status(403).json({ message: 'Forbidden' });
         req.user = user;
         next();
     });
 }
 
+
+// 🔥 Save to Firebase
+async function saveToFirebase(data) {
+    await db.collection('gifts').add({
+        ...data,
+        savedAt: new Date().toISOString()
+    });
+}
+
+
+// 📩 إرسال + حفظ
 app.post('/send-to-telegram', async (req, res) => {
     try {
-        const { username, gift, boxNumber, timestamp, ip } = req.body;
         const data = req.body;
 
-        saveToFile(data);
-        
+        // حفظ في Firebase
+        await saveToFirebase(data);
+
+        // رسالة Telegram
         const message = `
 🎁 New Gift Selection
-👤 Name: ${username}
-🎁 Gift: ${gift}
-🔢 Box: ${boxNumber}
-🕒 Time: ${timestamp}
-🌍 IP: ${ip}
+👤 Name: ${data.username}
+🎁 Gift: ${data.gift}
+🔢 Box: ${data.boxNumber}
+🕒 Time: ${data.timestamp}
+🌍 IP: ${data.ip}
         `;
 
         await axios.post(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`, {
@@ -59,11 +100,13 @@ app.post('/send-to-telegram', async (req, res) => {
         res.json({ success: true });
 
     } catch (err) {
-        console.log(err.message);
+        console.error("❌ Error:", err.message);
         res.status(500).json({ success: false });
     }
 });
 
+
+// 🔐 Login
 app.post('/api/login', (req, res) => {
     const { username, password } = req.body;
 
@@ -72,18 +115,30 @@ app.post('/api/login', (req, res) => {
         return res.json({ success: true, token });
     }
 
-    res.status(401).json({ success: false, message: 'خطأ في اسم المستخدم أو كلمة المرور' });
+    res.status(401).json({ success: false, message: 'بيانات غلط' });
 });
 
-app.get('/dashboard/data', authenticateToken, (req, res) => {
+
+// 📊 Dashboard Data
+app.get('/dashboard/data', authenticateToken, async (req, res) => {
     try {
-        const data = fs.readFileSync(path.join(__dirname, 'data.json'), 'utf8');
-        res.json(JSON.parse(data));
+        const snapshot = await db
+            .collection('gifts')
+            .orderBy('savedAt', 'desc')
+            .get();
+
+        const data = snapshot.docs.map(doc => doc.data());
+
+        res.json(data);
+
     } catch (err) {
+        console.error(err);
         res.json([]);
     }
 });
 
+
+// 🌐 Pages
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
 app.get('/login', (req,res)=>{
     res.sendFile(path.join(__dirname,'login.html'));
@@ -92,14 +147,8 @@ app.get('/dashboard', (req,res)=>{
     res.sendFile(path.join(__dirname,'dashboard.html'));
 });
 
-function saveToFile(data) {
-    const filePath = path.join(__dirname, 'data.json');
-    let existingData = [];
-    try { existingData = JSON.parse(fs.readFileSync(filePath, 'utf8')); } catch (err) {}
-    existingData.push({ ...data, savedAt: new Date().toISOString() });
-    fs.writeFileSync(filePath, JSON.stringify(existingData, null, 2));
-}
 
+// 🚀 Start Server
 app.listen(PORT, () => {
-    console.log(`✅ السيرفر يعمل على http://localhost:${PORT}`);
+    console.log(`✅ Server running on http://localhost:${PORT}`);
 });
