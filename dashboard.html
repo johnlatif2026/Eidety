@@ -425,11 +425,15 @@ function toggleOverride() {
 
     if (current) {
         localStorage.removeItem("override_open");
-        showModernToast("🔒 The site has been activated");
+        showModernToast("🔒 تم تفعيل القفل");
     } else {
         localStorage.setItem("override_open", "true");
-        showModernToast("🔓 The site was opened manually");
+        showModernToast("🔓 تم فتح الموقع يدوياً");
     }
+
+    setTimeout(() => {
+        window.open("/", "_blank");
+    }, 300);
 }
    
     // عناصر DOM
