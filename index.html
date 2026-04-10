@@ -610,6 +610,8 @@
             "احولك 100 جنيه 🎁"
         ];
 
+const unlockDate = new Date("2026-04-12T00:00:00").getTime();
+        
 function updateCountdown() {
     const now = new Date().getTime();
     const distance = unlockDate - now;
@@ -627,7 +629,7 @@ function updateCountdown() {
     const seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
     document.getElementById("countdown").innerHTML =
-        `${days} يوم - ${hours} ساعة - ${minutes} دقيقة - ${seconds} ثانية`;
+        `${hours} ساعة - ${minutes} دقيقة - ${seconds} ثانية`;
 }
 
 function checkLock() {
