@@ -147,6 +147,24 @@ app.get('/dashboard', (req,res)=>{
     res.sendFile(path.join(__dirname,'dashboard.html'));
 });
 
+// 🗑️ حذف عنصر من Firebase
+app.delete('/dashboard/data/:id', authenticateToken, async (req, res) => {
+    try {
+        const id = req.params.id;
+
+        if (!id) {
+            return res.status(400).send('ID مطلوب');
+        }
+
+        await db.collection('gifts').doc(id).delete();
+
+        res.json({ success: true });
+
+    } catch (err) {
+        console.error('❌ Delete Error:', err.message);
+        res.status(500).send('فشل الحذف');
+    }
+});
 
 // 🚀 Start Server
 app.listen(PORT, () => {
