@@ -3,133 +3,412 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dashboard</title>
-
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
-
+<title>Dashboard Eidety | عديتي</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 <style>
-* {
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family:'Cairo', sans-serif;
-}
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
 
-body {
-    background:#0f172a;
-    color:white;
-}
+    body {
+        font-family: 'Tajawal', sans-serif;
+        background: linear-gradient(135deg, #0b0f1c 0%, #1a1f2e 100%);
+        min-height: 100vh;
+        color: #f0f3fa;
+        position: relative;
+    }
 
-header {
-    padding:20px;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    background:#111827;
-    position:sticky;
-    top:0;
-}
+    /* خلفية متحركة */
+    body::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(circle at 20% 50%, rgba(79, 70, 229, 0.15) 0%, rgba(0,0,0,0) 50%);
+        pointer-events: none;
+        z-index: 0;
+    }
 
-button {
-    background:#ef4444;
-    border:none;
-    padding:10px 15px;
-    color:white;
-    border-radius:10px;
-    cursor:pointer;
-}
+    /* الهيدر - زجاجي */
+    header {
+        background: rgba(15, 23, 42, 0.7);
+        backdrop-filter: blur(16px);
+        border-bottom: 1px solid rgba(255,255,255,0.08);
+        padding: 1rem 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    }
 
-.container {
-    padding:20px;
-    max-width:900px;
-    margin:auto;
-}
+    .logo-area {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
 
-.card {
-    background:rgba(255,255,255,0.05);
-    border:1px solid rgba(255,255,255,0.1);
-    padding:15px;
-    margin:10px 0;
-    border-radius:15px;
-    transition:0.3s;
-}
+    .logo-icon {
+        font-size: 28px;
+        background: linear-gradient(45deg, #a855f7, #3b82f6);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+    }
 
-.card:hover {
-    transform:scale(1.02);
-    background:rgba(255,255,255,0.08);
-}
+    header h3 {
+        font-weight: 800;
+        font-size: 1.5rem;
+        background: linear-gradient(to left, #c084fc, #60a5fa);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        letter-spacing: -0.5px;
+    }
 
-.badge {
-    display:inline-block;
-    padding:5px 10px;
-    background:#f59e0b;
-    border-radius:8px;
-    font-size:12px;
-    margin-top:5px;
-}
+    .btn-logout {
+        background: linear-gradient(95deg, #dc2626, #b91c1c);
+        border: none;
+        padding: 10px 22px;
+        color: white;
+        border-radius: 40px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.25s ease;
+        box-shadow: 0 4px 12px rgba(220,38,38,0.3);
+    }
 
+    .btn-logout:hover {
+        transform: translateY(-2px);
+        filter: brightness(1.05);
+        box-shadow: 0 8px 18px rgba(220,38,38,0.4);
+    }
+
+    /* الحاوية الرئيسية */
+    .container {
+        max-width: 1100px;
+        margin: 30px auto;
+        padding: 0 20px 40px;
+        position: relative;
+        z-index: 2;
+    }
+
+    /* بطاقات أنيقة */
+    .card {
+        background: rgba(30, 35, 55, 0.6);
+        backdrop-filter: blur(8px);
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 28px;
+        padding: 1.2rem 1.8rem;
+        margin-bottom: 18px;
+        transition: all 0.35s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 15px;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    }
+
+    .card:hover {
+        transform: translateY(-5px) scale(1.01);
+        background: rgba(45, 52, 80, 0.8);
+        border-color: rgba(139, 92, 246, 0.5);
+        box-shadow: 0 20px 30px -12px rgba(0,0,0,0.4);
+    }
+
+    .info-section {
+        flex: 1;
+    }
+
+    .username {
+        font-size: 1.3rem;
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 6px;
+    }
+
+    .username i {
+        color: #facc15;
+        font-size: 1.3rem;
+    }
+
+    .gift-text {
+        font-size: 1rem;
+        color: #cbd5e6;
+        margin: 8px 0 6px;
+        word-break: break-word;
+        background: rgba(0,0,0,0.25);
+        padding: 6px 12px;
+        border-radius: 50px;
+        display: inline-block;
+    }
+
+    .badge-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: rgba(0, 0, 0, 0.4);
+        padding: 6px 14px;
+        border-radius: 40px;
+        font-size: 0.75rem;
+        color: #a5b4fc;
+        font-weight: 500;
+        margin-top: 8px;
+    }
+
+    /* زر الحذف - أنيق وناعم */
+    .delete-btn {
+        background: rgba(239, 68, 68, 0.15);
+        border: 1px solid rgba(239, 68, 68, 0.4);
+        color: #f87171;
+        padding: 10px 18px;
+        border-radius: 40px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.85rem;
+        transition: 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        backdrop-filter: blur(4px);
+    }
+
+    .delete-btn:hover {
+        background: #ef4444;
+        color: white;
+        border-color: #ef4444;
+        transform: scale(1.02);
+        box-shadow: 0 4px 12px rgba(239,68,68,0.4);
+    }
+
+    /* رسالة فارغة */
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        background: rgba(255,255,255,0.02);
+        border-radius: 48px;
+        border: 1px dashed rgba(255,255,255,0.2);
+    }
+
+    .empty-state i {
+        font-size: 60px;
+        color: #4b5563;
+        margin-bottom: 15px;
+    }
+
+    /* مؤقت تحميل */
+    .loading {
+        text-align: center;
+        padding: 50px;
+        font-size: 1.2rem;
+        color: #94a3b8;
+    }
+
+    /* استجابة */
+    @media (max-width: 640px) {
+        .card {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        .delete-btn {
+            justify-content: center;
+        }
+        header {
+            padding: 0.8rem 1rem;
+        }
+        .logo-icon {
+            font-size: 22px;
+        }
+    }
 </style>
 </head>
-
 <body>
 
 <header>
-    <h3>📊 Dashboard Live</h3>
-    <button onclick="logout()">Logout</button>
+    <div class="logo-area">
+        <i class="fas fa-chart-line logo-icon"></i>
+        <h3>قيادة Live</h3>
+    </div>
+    <button class="btn-logout" onclick="logout()">
+        <i class="fas fa-sign-out-alt"></i> Exit
+    </button>
 </header>
 
-<div class="container" id="data"></div>
+<div class="container" id="data">
+    <div class="loading">
+        <i class="fas fa-spinner fa-pulse"></i> Loading...
+    </div>
+</div>
 
 <script>
+    const token = localStorage.getItem('token');
 
-const token = localStorage.getItem('token');
-
-if (!token) {
-    window.location.href = '/login';
-}
-
-async function fetchData(){
-    try {
-        const res = await fetch('/dashboard/data', {
-            headers:{
-                'Authorization':'Bearer ' + token
-            }
-        });
-
-        if(res.status === 401 || res.status === 403){
-            localStorage.removeItem('token');
-            window.location.href = '/login';
-            return;
-        }
-
-        const data = await res.json();
-
-        document.getElementById('data').innerHTML =
-        data.reverse().map(item => `
-            <div class="card">
-                <div>👤 <b>${item.username || 'Unknown'}</b></div>
-                <div>🎁 ${item.gift || ''}</div>
-                <div class="badge">🕒 ${new Date(item.savedAt).toLocaleString()}</div>
-            </div>
-        `).join('');
-
-    } catch(err){
-        console.log('error loading data');
+    if (!token) {
+        window.location.href = '/login';
     }
-}
 
-function logout(){
-    localStorage.removeItem('token');
-    window.location.href = '/login';
-}
+    // دالة جلب البيانات وعرضها مع أزرار الحذف
+    async function fetchData() {
+        try {
+            const res = await fetch('/dashboard/data', {
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                }
+            });
 
-// أول تحميل
-fetchData();
+            if (res.status === 401 || res.status === 403) {
+                localStorage.removeItem('token');
+                window.location.href = '/login';
+                return;
+            }
 
-// 🔥 Live refresh كل 3 ثواني
-setInterval(fetchData, 3000);
+            let data = await res.json();
 
+            // عكس الترتيب (الأحدث أولاً)
+            data = data.reverse();
+
+            const container = document.getElementById('data');
+
+            if (!data.length) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-inbox"></i>
+                        <h3>لا توجد هدايا مسجلة</h3>
+                        <p>سيظهر هنا الإهداءات الجديدة بشكل لحظي</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // إنشاء البطاقات مع زر حذف لكل عنصر
+            container.innerHTML = data.map(item => `
+                <div class="card" data-id="${item.id || item._id || item.savedAt}">
+                    <div class="info-section">
+                        <div class="username">
+                            <i class="fas fa-user-astronaut"></i>
+                            <b>${escapeHtml(item.username || 'مجهول')}</b>
+                        </div>
+                        <div class="gift-text">
+                            <i class="fas fa-gift" style="margin-left: 6px; color:#f97316;"></i> 
+                            ${escapeHtml(item.gift || 'هدية خاصة')}
+                        </div>
+                        <div class="badge-time">
+                            <i class="far fa-clock"></i>
+                            ${new Date(item.savedAt).toLocaleString('ar-EG')}
+                        </div>
+                    </div>
+                    <button class="delete-btn" onclick="deleteItem('${item.id || item._id}')">
+                        <i class="fas fa-trash-alt"></i> حذف
+                    </button>
+                </div>
+            `).join('');
+
+        } catch (err) {
+            console.error('خطأ في التحميل:', err);
+            document.getElementById('data').innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <h3>فشل الاتصال</h3>
+                    <p>حاول تحديث الصفحة لاحقاً</p>
+                </div>
+            `;
+        }
+    }
+
+    // دالة حذف العنصر (ترسل طلب DELETE إلى الخادم)
+    window.deleteItem = async function(id) {
+        if (!confirm('⚠️ هل أنت متأكد من حذف هذا الإهداء؟')) return;
+
+        try {
+            const res = await fetch(`/dashboard/data/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': 'Bearer ' + token,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (res.status === 401 || res.status === 403) {
+                localStorage.removeItem('token');
+                window.location.href = '/login';
+                return;
+            }
+
+            if (res.ok) {
+                // تحديث الواجهة فوراً بدون إعادة تحميل الصفحة
+                fetchData();
+                // (اختياري) إظهار رسالة نجاح سريعة
+                showToast('✅ تم الحذف بنجاح');
+            } else {
+                const errorText = await res.text();
+                alert('فشل الحذف: ' + errorText);
+            }
+        } catch (err) {
+            console.error('خطأ في الحذف:', err);
+            alert('حدث خطأ في الشبكة أثناء محاولة الحذف');
+        }
+    };
+
+    // دالة مساعدة لمنع XSS
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function(c) {
+            return c;
+        });
+    }
+
+    // تويست بسيط للرسائل
+    function showToast(msg) {
+        let toast = document.createElement('div');
+        toast.innerText = msg;
+        toast.style.position = 'fixed';
+        toast.style.bottom = '20px';
+        toast.style.left = '50%';
+        toast.style.transform = 'translateX(-50%)';
+        toast.style.backgroundColor = '#10b981';
+        toast.style.color = '#fff';
+        toast.style.padding = '12px 24px';
+        toast.style.borderRadius = '40px';
+        toast.style.fontWeight = 'bold';
+        toast.style.zIndex = '9999';
+        toast.style.backdropFilter = 'blur(10px)';
+        toast.style.boxShadow = '0 4px 15px rgba(0,0,0,0.3)';
+        document.body.appendChild(toast);
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            setTimeout(() => toast.remove(), 500);
+        }, 2000);
+    }
+
+    function logout() {
+        localStorage.removeItem('token');
+        window.location.href = '/login';
+    }
+
+    // تحميل أولي
+    fetchData();
+
+    // تحديث حي كل 3 ثوانٍ (live)
+    setInterval(fetchData, 3000);
 </script>
-
 </body>
 </html>
