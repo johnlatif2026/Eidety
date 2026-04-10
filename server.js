@@ -5,8 +5,6 @@ const cors = require('cors');
 const axios = require('axios');
 const jwt = require('jsonwebtoken');
 const path = require('path');
-
-// 🔥 Firebase Admin
 const admin = require('firebase-admin');
 
 const app = express();
@@ -26,18 +24,14 @@ const {
   FIREBASE_KEY
 } = process.env;
 
-
-// 🔥 Firebase Init من .env
+// Firebase init
 let serviceAccount;
 
 try {
     serviceAccount = JSON.parse(FIREBASE_KEY);
-
-    // إصلاح مشكلة private key
     serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, '\n');
-
 } catch (err) {
-    console.error("❌ Firebase JSON Error:", err.message);
+    console.error("Firebase Error:", err.message);
     process.exit(1);
 }
 
@@ -47,10 +41,9 @@ admin.initializeApp({
 
 const db = admin.firestore();
 
-console.log("✅ Firebase Connected");
+console.log("Firebase Connected");
 
-
-// 🔐 Middleware
+// Middleware
 function authenticateToken(req, res, next) {
     const authHeader = req.headers['authorization'];
     const token = authHeader?.split(' ')[1];
@@ -64,8 +57,7 @@ function authenticateToken(req, res, next) {
     });
 }
 
-
-// 🔥 Save to Firebase
+// Save
 async function saveToFirebase(data) {
     await db.collection('gifts').add({
         ...data,
@@ -73,40 +65,27 @@ async function saveToFirebase(data) {
     });
 }
 
-
-// 📩 إرسال + حفظ
+// Telegram + Save
 app.post('/send-to-telegram', async (req, res) => {
     try {
         const data = req.body;
 
-        // حفظ في Firebase
         await saveToFirebase(data);
-
-        // رسالة Telegram
-        const message = `
-🎁 New Gift Selection
-👤 Name: ${data.username}
-🎁 Gift: ${data.gift}
-🔢 Box: ${data.boxNumber}
-🕒 Time: ${data.timestamp}
-🌍 IP: ${data.ip}
-        `;
 
         await axios.post(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`, {
             chat_id: TELEGRAM_CHAT_ID,
-            text: message
+            text: `🎁 New Gift\n👤 ${data.username}\n🎁 ${data.gift}`
         });
 
         res.json({ success: true });
 
     } catch (err) {
-        console.error("❌ Error:", err.message);
+        console.error(err.message);
         res.status(500).json({ success: false });
     }
 });
 
-
-// 🔐 Login
+// Login
 app.post('/api/login', (req, res) => {
     const { username, password } = req.body;
 
@@ -115,11 +94,10 @@ app.post('/api/login', (req, res) => {
         return res.json({ success: true, token });
     }
 
-    res.status(401).json({ success: false, message: 'بيانات غلط' });
+    res.status(401).json({ success: false });
 });
 
-
-// 📊 Dashboard Data
+// GET DATA (🔥 مهم: رجعنا الـ ID)
 app.get('/dashboard/data', authenticateToken, async (req, res) => {
     try {
         const snapshot = await db
@@ -127,7 +105,10 @@ app.get('/dashboard/data', authenticateToken, async (req, res) => {
             .orderBy('savedAt', 'desc')
             .get();
 
-        const data = snapshot.docs.map(doc => doc.data());
+        const data = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        }));
 
         res.json(data);
 
@@ -137,21 +118,12 @@ app.get('/dashboard/data', authenticateToken, async (req, res) => {
     }
 });
 
-
-// 🌐 Pages
-app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
-app.get('/login', (req,res)=>{
-    res.sendFile(path.join(__dirname,'login.html'));
-});
-app.get('/dashboard', (req,res)=>{
-    res.sendFile(path.join(__dirname,'dashboard.html'));
-});
-
+// DELETE (🔥 شغال 100%)
 app.delete('/dashboard/data/:id', authenticateToken, async (req, res) => {
     try {
         const id = req.params.id;
 
-        console.log("DELETE ID:", id);
+        console.log("Deleting ID:", id);
 
         const docRef = db.collection('gifts').doc(id);
         const doc = await docRef.get();
@@ -162,15 +134,20 @@ app.delete('/dashboard/data/:id', authenticateToken, async (req, res) => {
 
         await docRef.delete();
 
-        res.json({ success: true, deletedId: id });
+        res.json({ success: true });
 
     } catch (err) {
-        console.error('❌ Delete Error:', err);
+        console.error(err);
         res.status(500).send('فشل الحذف');
     }
 });
 
-// 🚀 Start Server
+// Pages
+app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
+app.get('/login', (req, res) => res.sendFile(path.join(__dirname, 'login.html')));
+app.get('/dashboard', (req, res) => res.sendFile(path.join(__dirname, 'dashboard.html')));
+
+// Start
 app.listen(PORT, () => {
-    console.log(`✅ Server running on http://localhost:${PORT}`);
+    console.log(`Server running on http://localhost:${PORT}`);
 });
