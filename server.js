@@ -1,150 +1,163 @@
+require('dotenv').config();
 const express = require('express');
+const bodyParser = require('body-parser');
 const cors = require('cors');
 const axios = require('axios');
 const jwt = require('jsonwebtoken');
+const path = require('path');
 const admin = require('firebase-admin');
 
 const app = express();
+const PORT = process.env.PORT || 3000;
 
 app.use(cors());
-app.use(express.json());
+app.use(bodyParser.json());
+app.use(express.static('public'));
 
 // ENV
-const {
-  ADMIN_USER,
-  ADMIN_PASS,
-  JWT_SECRET,
-  TELEGRAM_TOKEN,
+const { 
+  ADMIN_USER, 
+  ADMIN_PASS, 
+  JWT_SECRET, 
+  TELEGRAM_TOKEN, 
   TELEGRAM_CHAT_ID,
   FIREBASE_KEY
 } = process.env;
 
-// 🔥 حماية من crash
-if (!FIREBASE_KEY) {
-  console.error("Missing FIREBASE_KEY");
-}
-
-// Firebase init (safe)
-let db;
+// Firebase init
+let serviceAccount;
 
 try {
-  const serviceAccount = JSON.parse(FIREBASE_KEY?.replace(/\\n/g, '\n') || '{}');
-
-  if (!admin.apps.length) {
-    admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount)
-    });
-  }
-
-  db = admin.firestore();
-
+    serviceAccount = JSON.parse(FIREBASE_KEY);
+    serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, '\n');
 } catch (err) {
-  console.error("Firebase init error:", err.message);
+    console.error("Firebase Error:", err.message);
+    process.exit(1);
 }
 
-// site status doc
-const siteRef = () => db.collection('config').doc('site');
+admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount)
+});
 
-// middleware auth
-function auth(req, res, next) {
-  const token = req.headers.authorization?.split(' ')[1];
-  if (!token) return res.status(401).json({ error: 'no token' });
+const db = admin.firestore();
 
-  try {
-    jwt.verify(token, JWT_SECRET);
-    next();
-  } catch {
-    res.status(403).json({ error: 'invalid token' });
-  }
+console.log("Firebase Connected");
+
+// Middleware
+function authenticateToken(req, res, next) {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader?.split(' ')[1];
+
+    if (!token) return res.status(401).json({ message: 'Unauthorized' });
+    jwt.verify(token, JWT_SECRET, (err, user) => {
+        if (err) return res.status(403).json({ message: 'Forbidden' });
+        req.user = user;
+        next();
+    });
 }
 
-/* =========================
-   SITE STATUS
-========================= */
+// Save
+async function saveToFirebase(data) {
+    await db.collection('gifts').add({
+        ...data,
+        savedAt: new Date().toISOString()
+    });
+}
 
-app.get('/api/site-status', async (req, res) => {
-  try {
-    const doc = await siteRef().get();
+// Telegram + Save
+app.post('/send-to-telegram', async (req, res) => {
+    try {
+        const data = req.body;
 
-    if (!doc.exists) {
-      await siteRef().set({ open: true });
-      return res.json({ open: true });
+        // حفظ في Firebase
+        await saveToFirebase(data);
+
+        // رسالة Telegram
+        const message = `
+🎁 New Gift Selection
+👤 Name: ${data.username}
+🎁 Gift: ${data.gift}
+🔢 Box: ${data.boxNumber}
+🕒 Time: ${data.timestamp}
+🌍 IP: ${data.ip}
+`;
+
+        await axios.post(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`, {
+    chat_id: TELEGRAM_CHAT_ID,
+    text: message
+});
+
+        res.json({ success: true });
+
+    } catch (err) {
+        console.error("❌ Error:", err.message);
+        res.status(500).json({ success: false });
+    }
+});
+
+// Login
+app.post('/api/login', (req, res) => {
+    const { username, password } = req.body;
+
+    if (username === ADMIN_USER && password === ADMIN_PASS) {
+        const token = jwt.sign({ username }, JWT_SECRET, { expiresIn: '2h' });
+        return res.json({ success: true, token });
     }
 
-    res.json({ open: doc.data().open });
-  } catch (e) {
-    console.error(e);
-    res.json({ open: true });
-  }
+    res.status(401).json({ success: false });
 });
 
-app.post('/api/site-toggle', auth, async (req, res) => {
-  try {
-    const doc = await siteRef().get();
-    const current = doc.exists ? doc.data().open : true;
+// GET DATA (🔥 مهم: رجعنا الـ ID)
+app.get('/dashboard/data', authenticateToken, async (req, res) => {
+    try {
+        const snapshot = await db
+            .collection('gifts')
+            .orderBy('savedAt', 'desc')
+            .get();
 
-    await siteRef().set({ open: !current });
+        const data = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        }));
 
-    res.json({ success: true, open: !current });
-  } catch (e) {
-    console.error(e);
-    res.status(500).json({ success: false });
-  }
+        res.json(data);
+
+    } catch (err) {
+        console.error(err);
+        res.json([]);
+    }
 });
 
-/* =========================
-   SAVE + TELEGRAM
-========================= */
+// DELETE (🔥 شغال 100%)
+app.delete('/dashboard/data/:id', authenticateToken, async (req, res) => {
+    try {
+        const id = req.params.id;
 
-app.post('/send-to-telegram', async (req, res) => { try { const data = req.body; // حفظ في Firebase await saveToFirebase(data); // رسالة Telegram const message = 🎁 New Gift Selection 👤 Name: ${data.username} 🎁 Gift: ${data.gift} 🔢 Box: ${data.boxNumber} 🕒 Time: ${data.timestamp} 🌍 IP: ${data.ip} ; await axios.post(https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage, { chat_id: TELEGRAM_CHAT_ID, text: message}); res.json({ success: true }); } catch (err) { console.error("❌ Error:", err.message); res.status(500).json({ success: false }); } });
+        console.log("Deleting ID:", id);
 
-/* =========================
-   LOGIN
-========================= */
+        const docRef = db.collection('gifts').doc(id);
+        const doc = await docRef.get();
 
-app.post('/api/login', (req, res) => {
-  const { username, password } = req.body;
+        if (!doc.exists) {
+            return res.status(404).send('العنصر غير موجود');
+        }
 
-  if (username === ADMIN_USER && password === ADMIN_PASS) {
-    const token = jwt.sign({ username }, JWT_SECRET, { expiresIn: '2h' });
-    return res.json({ success: true, token });
-  }
+        await docRef.delete();
 
-  res.status(401).json({ success: false });
+        res.json({ success: true });
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('فشل الحذف');
+    }
 });
 
-/* =========================
-   DASHBOARD DATA
-========================= */
+// Pages
+app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
+app.get('/login', (req, res) => res.sendFile(path.join(__dirname, 'login.html')));
+app.get('/dashboard', (req, res) => res.sendFile(path.join(__dirname, 'dashboard.html')));
 
-app.get('/dashboard/data', auth, async (req, res) => {
-  try {
-    const snap = await db.collection('gifts').orderBy('savedAt', 'desc').get();
-
-    const data = snap.docs.map(d => ({
-      id: d.id,
-      ...d.data()
-    }));
-
-    res.json(data);
-  } catch (e) {
-    console.error(e);
-    res.json([]);
-  }
+// Start
+app.listen(PORT, () => {
+    console.log(`Server running on http://localhost:${PORT}`);
 });
-
-app.delete('/dashboard/data/:id', auth, async (req, res) => {
-  try {
-    await db.collection('gifts').doc(req.params.id).delete();
-    res.json({ success: true });
-  } catch (e) {
-    console.error(e);
-    res.status(500).json({ success: false });
-  }
-});
-
-/* =========================
-   EXPORT FOR VERCEL
-========================= */
-
-module.exports = app;
