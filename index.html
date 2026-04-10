@@ -1,3 +1,8 @@
+عاوز يبقى مكتوب
+"هذا الموقع مغلق يفتح في"
+ويكون في عداد محطوط العداد هيخلص يوم 12/04 الساعة 12 ف بداية اليوم
+علشان عيد القيامة المجيد للمسيحيين ارثوذكسي يعني علشان انا مسيحي ارثوذكسي و ف الداشبورد اقدر افتحه واقفله براحتي ولكن لو انا مفتحتهوش يتفتح تلقائي ف الميعاد الي قايل عليه ويكون في خريستوس انيستي و عد تنازلي ودي الاكواد اهي
+index.html
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -591,59 +596,7 @@
             "تحولي 50 جنيه 🎁",
             "تحولي 50 جنيه 🎁"
         ];
-const OPEN_DATE = new Date("2026-04-12T00:00:00");
 
-async function checkSiteStatus() {
-    try {
-        const res = await fetch('/api/site-status');
-        const data = await res.json();
-
-        if (!data.open) {
-            showLockScreen();
-            return false;
-        }
-        return true;
-    } catch (e) {
-        return true;
-    }
-}
-
-function showLockScreen() {
-    document.body.innerHTML = `
-        <div style="
-            height:100vh;
-            display:flex;
-            justify-content:center;
-            align-items:center;
-            flex-direction:column;
-            text-align:center;
-            font-family:Cairo;
-            background:linear-gradient(145deg,#0a0f1a,#0f172a);
-            color:white;">
-            <h1>الموقع مغلق حالياً</h1>
-            <p>ارجع لاحقاً</p>
-        </div>
-    `;
-}
-
-window.onload = async function () {
-    const allowed = await checkSiteStatus();
-    if (!allowed) return;
-
-    createSnowflakes();
-
-    const savedName = localStorage.getItem('username');
-    const savedGift = localStorage.getItem('gift');
-
-    if (savedName && savedGift) {
-        showGiftPage(savedName);
-        showGift(savedGift);
-        disableAllBoxes();
-    } else if (savedName) {
-        document.getElementById('username').value = savedName;
-    }
-};
-        
         // إنشاء الثلج في الخلفية
         function createSnowflakes() {
             for (let i = 0; i < 50; i++) {
@@ -685,25 +638,20 @@ window.onload = async function () {
         }
 
         // تحميل البيانات المحفوظة
-        window.onload = function () {
-    if (isLocked()) {
-        showLockScreen();
-        return;
-    }
-
-    createSnowflakes();
-
-    const savedName = localStorage.getItem('username');
-    const savedGift = localStorage.getItem('gift');
-
-    if (savedName && savedGift) {
-        showGiftPage(savedName);
-        showGift(savedGift);
-        disableAllBoxes();
-    } else if (savedName) {
-        document.getElementById('username').value = savedName;
-    }
-};
+        window.onload = function() {
+            createSnowflakes();
+            
+            const savedName = localStorage.getItem('username');
+            const savedGift = localStorage.getItem('gift');
+            
+            if (savedName && savedGift) {
+                showGiftPage(savedName);
+                showGift(savedGift);
+                disableAllBoxes();
+            } else if (savedName) {
+                document.getElementById('username').value = savedName;
+            }
+        };
 
         function start() {
             const nameInput = document.getElementById('username');
@@ -828,5 +776,647 @@ window.onload = async function () {
             console.log('البيانات المحفوظة محلياً:', savedData);
         }
     </script>
+</body>
+</html>
+dashboard.html
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Dashboard Eidety | عديتي</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Tajawal', sans-serif;
+        background: radial-gradient(circle at 10% 20%, rgba(10, 14, 23, 1) 0%, #070b17 100%);
+        min-height: 100vh;
+        color: #edf2ff;
+        position: relative;
+        overflow-x: hidden;
+    }
+
+    /* animated background orbs */
+    .orb {
+        position: fixed;
+        border-radius: 50%;
+        filter: blur(90px);
+        opacity: 0.4;
+        z-index: 0;
+        pointer-events: none;
+    }
+    .orb-1 { width: 50vw; height: 50vw; background: #8b5cf6; top: -20vh; left: -20vw; }
+    .orb-2 { width: 60vh; height: 60vh; background: #3b82f6; bottom: -30vh; right: -10vw; opacity: 0.3; }
+    .orb-3 { width: 40vh; height: 40vh; background: #ec489a; top: 40%; right: 30%; opacity: 0.2; }
+
+    /* glassmorphism header */
+    .glass-header {
+        background: rgba(15, 23, 42, 0.65);
+        backdrop-filter: blur(18px);
+        border-bottom: 1px solid rgba(139, 92, 246, 0.3);
+        padding: 0.9rem 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5);
+    }
+
+    .logo-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        background: linear-gradient(120deg, #ffffff10, #ffffff05);
+        padding: 6px 16px;
+        border-radius: 60px;
+        backdrop-filter: blur(4px);
+    }
+
+    .logo-icon {
+        font-size: 28px;
+        background: linear-gradient(135deg, #f0a6ff, #7c3aed);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        text-shadow: 0 0 8px rgba(124,58,237,0.3);
+    }
+
+    .logo-wrapper h3 {
+        font-weight: 800;
+        font-size: 1.5rem;
+        letter-spacing: -0.3px;
+        background: linear-gradient(to left, #e9d5ff, #93c5fd);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+    }
+
+    .badge-user {
+        background: rgba(255,255,240,0.05);
+        border-radius: 40px;
+        padding: 6px 18px;
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .btn-exit {
+        background: linear-gradient(105deg, #dc2626, #9b2c2c);
+        border: none;
+        padding: 8px 24px;
+        border-radius: 40px;
+        font-weight: 700;
+        font-size: 0.9rem;
+        color: white;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 5px 12px rgba(220,38,38,0.3);
+    }
+
+    .btn-exit:hover {
+        transform: scale(1.02) translateY(-2px);
+        background: linear-gradient(105deg, #ef4444, #b91c1c);
+        box-shadow: 0 12px 20px -8px #dc2626;
+    }
+
+    /* main container */
+    .dashboard-container {
+        max-width: 1200px;
+        margin: 2rem auto 3rem;
+        padding: 0 24px;
+        position: relative;
+        z-index: 3;
+    }
+
+    /* header section with counter + live badge */
+    .stats-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        flex-wrap: wrap;
+        margin-bottom: 2rem;
+        gap: 15px;
+    }
+
+    .live-indicator {
+        background: rgba(16, 185, 129, 0.15);
+        backdrop-filter: blur(12px);
+        border-radius: 60px;
+        padding: 6px 18px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.85rem;
+        border: 1px solid rgba(16, 185, 129, 0.4);
+        color: #6ee7b7;
+    }
+
+    .gift-counter {
+        background: linear-gradient(145deg, #1e293b, #0f172a);
+        border-radius: 28px;
+        padding: 8px 24px;
+        font-weight: 700;
+        font-size: 1.1rem;
+        box-shadow: 0 4px 14px rgba(0,0,0,0.3);
+        border: 1px solid rgba(139,92,246,0.4);
+    }
+
+    .gift-counter i {
+        color: #fbbf24;
+        margin-left: 8px;
+    }
+
+    /* elegant card grid */
+    .gifts-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+    }
+
+    /* card with futuristic glassmorphism */
+    .gift-card {
+        background: rgba(20, 27, 45, 0.65);
+        backdrop-filter: blur(12px);
+        border-radius: 32px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        padding: 1.3rem 1.8rem;
+        transition: all 0.35s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 20px;
+        box-shadow: 0 15px 35px -12px rgba(0,0,0,0.4);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .gift-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 5px;
+        height: 100%;
+        background: linear-gradient(to bottom, #a855f7, #3b82f6);
+        border-radius: 32px 0 0 32px;
+    }
+
+    .gift-card:hover {
+        transform: translateY(-6px);
+        background: rgba(30, 41, 65, 0.85);
+        border-color: rgba(139, 92, 246, 0.5);
+        box-shadow: 0 25px 40px -12px #00000066;
+    }
+
+    .gift-info {
+        flex: 1;
+    }
+
+    .username-line {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 8px;
+    }
+
+    .username-line strong {
+        font-size: 1.3rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, #fef08a, #facc15);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        letter-spacing: -0.2px;
+    }
+
+    .gift-message {
+        background: rgba(0, 0, 0, 0.35);
+        padding: 10px 18px;
+        border-radius: 50px;
+        display: inline-block;
+        margin: 8px 0 12px;
+        font-size: 1rem;
+        font-weight: 500;
+        color: #e2e8ff;
+        border-right: 2px solid #facc15;
+        word-break: break-word;
+        max-width: 100%;
+    }
+
+    .timestamp-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: rgba(0, 0, 0, 0.45);
+        padding: 5px 14px;
+        border-radius: 40px;
+        font-size: 0.7rem;
+        font-weight: 500;
+        color: #b9c3f0;
+        letter-spacing: 0.3px;
+    }
+
+    /* delete button - modern */
+    .delete-gift-btn {
+        background: rgba(239, 68, 68, 0.1);
+        border: 1px solid rgba(239, 68, 68, 0.5);
+        color: #ff9f9f;
+        padding: 10px 22px;
+        border-radius: 40px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        backdrop-filter: blur(4px);
+    }
+
+    .delete-gift-btn:hover {
+        background: #ef4444;
+        color: white;
+        border-color: #ef4444;
+        transform: scale(1.02);
+        box-shadow: 0 6px 14px #ef444480;
+    }
+
+    /* empty state with animation */
+    .empty-elegant {
+        text-align: center;
+        padding: 70px 20px;
+        background: rgba(15, 25, 45, 0.5);
+        backdrop-filter: blur(10px);
+        border-radius: 64px;
+        border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .empty-elegant i {
+        font-size: 70px;
+        background: linear-gradient(145deg, #8b5cf6, #38bdf8);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        margin-bottom: 20px;
+    }
+
+    .empty-elegant h3 {
+        font-size: 1.7rem;
+        margin-bottom: 12px;
+    }
+
+    /* loading shimmer */
+    .loading-modern {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 15px;
+        background: rgba(0,0,0,0.3);
+        border-radius: 80px;
+        padding: 20px;
+        backdrop-filter: blur(10px);
+    }
+
+    /* toast */
+    .toast-message {
+        position: fixed;
+        bottom: 30px;
+        left: 50%;
+        transform: translateX(-50%) translateY(20px);
+        background: #1e293b;
+        backdrop-filter: blur(20px);
+        color: #bbf7d0;
+        padding: 12px 28px;
+        border-radius: 60px;
+        font-weight: 600;
+        border: 1px solid #10b981;
+        box-shadow: 0 10px 25px -5px black;
+        z-index: 200;
+        transition: 0.2s;
+        font-size: 0.9rem;
+    }
+
+    @media (max-width: 680px) {
+        .glass-header {
+            padding: 0.7rem 1rem;
+        }
+        .gift-card {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        .delete-gift-btn {
+            justify-content: center;
+        }
+        .stats-row {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        .logo-wrapper h3 {
+            font-size: 1.1rem;
+        }
+    }
+
+    /* subtle animation for cards */
+    @keyframes fadeSlide {
+        from {
+            opacity: 0;
+            transform: translateY(18px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .gift-card {
+        animation: fadeSlide 0.3s ease-out;
+    }
+</style>
+</head>
+<body>
+
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
+
+<header class="glass-header">
+    <div class="logo-wrapper">
+        <i class="fas fa-gem logo-icon"></i>
+        <h3>Dashboard Eidetty | عيديتي</h3>
+    </div>
+    <div style="display: flex; gap: 14px; align-items: center;">
+        <div class="badge-user">
+            <i class="fas fa-user-astronaut" style="color:#a78bfa;"></i>
+            <span> مرحباً بك</span>
+        </div>
+        <button class="btn-exit" id="logoutBtn">
+            <i class="fas fa-arrow-right-from-bracket"></i> خروج
+        </button>
+    </div>
+</header>
+
+<main class="dashboard-container">
+    <div class="stats-row">
+        <div class="live-indicator">
+            <i class="fas fa-circle" style="font-size: 10px; color: #10b981;"></i>
+            <span>مباشر | تحديث لحظي</span>
+        </div>
+        <div class="gift-counter" id="giftCounter">
+            <i class="fas fa-gift"></i> <span id="giftCountValue">0</span> هدية
+        </div>
+    </div>
+
+    <div id="dynamicGiftsArea">
+        <div class="loading-modern">
+            <i class="fas fa-spinner fa-pulse fa-2x" style="color:#c084fc;"></i>
+            <span>جاري تحميل الهدايا ...</span>
+        </div>
+    </div>
+</main>
+
+<script>
+    // ---------- TOKEN HANDLING ----------
+    const token = localStorage.getItem('token');
+    if (!token) {
+        // إذا لم يكن هناك توكن نعيد التوجيه إلى صفحة الدخول (محاكاة)
+        window.location.href = '/login';
+    }
+
+    // عناصر DOM
+    const giftsContainer = document.getElementById('dynamicGiftsArea');
+    const giftCountSpan = document.getElementById('giftCountValue');
+
+    // Helper: escape html
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function(c) {
+            return c;
+        });
+    }
+
+    // عرض إشعار أنيق
+    function showModernToast(msg, isError = false) {
+        const existingToast = document.querySelector('.toast-message');
+        if(existingToast) existingToast.remove();
+        const toast = document.createElement('div');
+        toast.className = 'toast-message';
+        toast.innerHTML = `<i class="fas ${isError ? 'fa-triangle-exclamation' : 'fa-check-circle'}"></i> ${msg}`;
+        if(isError) {
+            toast.style.borderColor = '#f97316';
+            toast.style.color = '#fed7aa';
+        }
+        document.body.appendChild(toast);
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            setTimeout(() => toast.remove(), 300);
+        }, 2300);
+    }
+
+    // تحديث العداد
+    function updateCounter(count) {
+        if(giftCountSpan) giftCountSpan.innerText = count;
+    }
+
+    // دالة جلب البيانات من الـ API
+    async function fetchGifts() {
+        try {
+            const response = await fetch('/dashboard/data', {
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                }
+            });
+
+            // لو 401 او 403 -> تسجيل خروج
+            if (response.status === 401 || response.status === 403) {
+                localStorage.removeItem('token');
+                window.location.href = '/login';
+                return;
+            }
+
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
+
+            let data = await response.json();
+            // نتأكد ان البيانات مصفوفة
+            if (!Array.isArray(data)) data = [];
+
+            // تحديث العداد
+            updateCounter(data.length);
+
+            if (data.length === 0) {
+                renderEmptyState();
+                return;
+            }
+
+            renderGiftCards(data);
+        } catch (err) {
+            console.error('Fetch error:', err);
+            // عرض حالة خطأ لطيفة
+            giftsContainer.innerHTML = `
+                <div class="empty-elegant" style="border-color:#ef444430">
+                    <i class="fas fa-plug"></i>
+                    <h3>تعذر الاتصال بالخادم</h3>
+                    <p>سيتم إعادة المحاولة تلقائياً</p>
+                </div>
+            `;
+        }
+    }
+
+    // عرض بطاقات الهدايا بشكل جذاب
+    function renderGiftCards(giftsArray) {
+        if (!giftsContainer) return;
+        const cardsHtml = giftsArray.map(item => {
+            const userName = escapeHtml(item.username || 'مُهدي كريم');
+            const giftContent = escapeHtml(item.gift || '✨ هدية خاصة ✨');
+            let savedDate = item.savedAt ? new Date(item.savedAt) : new Date();
+            // التحقق من صلاحية التاريخ
+            const dateString = !isNaN(savedDate.getTime()) ? savedDate.toLocaleString('ar-EG', {hour12: false}) : 'تاريخ حديث';
+            
+            return `
+                <div class="gift-card" data-id="${escapeHtml(item.id)}">
+                    <div class="gift-info">
+                        <div class="username-line">
+                            <i class="fas fa-crown" style="color:#facc15;"></i>
+                            <strong>${userName}</strong>
+                        </div>
+                        <div class="gift-message">
+                            <i class="fas fa-heart" style="color:#f472b6; font-size: 0.8rem;"></i> ${giftContent}
+                        </div>
+                        <div class="timestamp-badge">
+                            <i class="far fa-calendar-alt"></i> ${dateString}
+                        </div>
+                    </div>
+                    <button class="delete-gift-btn" data-id="${escapeHtml(item.id)}">
+                        <i class="fas fa-trash-alt"></i> حذف الهدية
+                    </button>
+                </div>
+            `;
+        }).join('');
+
+        giftsContainer.innerHTML = `<div class="gifts-grid">${cardsHtml}</div>`;
+        
+        // إضافة مستمعي الأحداث لأزرار الحذف بعد إدراجها في DOM
+        document.querySelectorAll('.delete-gift-btn').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                e.stopPropagation();
+                const giftId = btn.getAttribute('data-id');
+                if (giftId) {
+                    await deleteGiftItem(giftId);
+                }
+            });
+        });
+    }
+
+    // حالة عدم وجود هدايا
+    function renderEmptyState() {
+        giftsContainer.innerHTML = `
+            <div class="empty-elegant">
+                <i class="fas fa-gift"></i>
+                <h3>✨ لا توجد هدايا مسجلة بعد ✨</h3>
+                <p>سيظهر هنا أي إهداء جديد بشكل فوري وأنيق</p>
+                <div style="margin-top: 20px; font-size: 0.8rem; opacity:0.7;">
+                    <i class="fas fa-sync-alt"></i> في انتظار الهدايا الجديدة
+                </div>
+            </div>
+        `;
+    }
+
+    // حذف عنصر بواسطة API
+    async function deleteGiftItem(id) {
+        // مربع حوار مخصص وجميل باستخدام confirm أصلي لكن مع تحسين النص
+        const userConfirmed = confirm(`🗑️ هل أنت متأكد من حذف هذه الهدية؟`);
+        if (!userConfirmed) return;
+
+        try {
+            const deleteResponse = await fetch(`/dashboard/data/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': 'Bearer ' + token,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (deleteResponse.ok) {
+                showModernToast('✅ تم حذف الهدية بنجاح');
+                await fetchGifts();  // إعادة تحميل القائمة وتحديث العدد
+            } else if (deleteResponse.status === 401 || deleteResponse.status === 403) {
+                localStorage.removeItem('token');
+                window.location.href = '/login';
+            } else {
+                const errorText = await deleteResponse.text();
+                showModernToast(`⚠️ فشل الحذف: ${errorText || 'خطأ غير معروف'}`, true);
+            }
+        } catch (err) {
+            console.error(err);
+            showModernToast('❌ خطأ في الشبكة أثناء الحذف', true);
+        }
+    }
+
+    // تسجيل الخروج
+    function logoutUser() {
+        localStorage.removeItem('token');
+        showModernToast('🔐 جاري الخروج من لوحة التحكم');
+        setTimeout(() => {
+            window.location.href = '/login';
+        }, 400);
+    }
+
+    // ربط زر الخروج
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', logoutUser);
+    }
+
+    // تحديث دوري كل 3 ثواني
+    let intervalId = null;
+    
+    // بدء polling
+    function startPolling() {
+        if (intervalId) clearInterval(intervalId);
+        fetchGifts(); // أول تحميل فوري
+        intervalId = setInterval(() => {
+            fetchGifts();
+        }, 3000);
+    }
+
+    // إعادة محاولة ذكية عند فقد الاتصال لكن التحديث الدوري مستمر
+    window.addEventListener('load', () => {
+        startPolling();
+    });
+
+    // (اختياري) التعامل مع حالات التركيز - تحديث فوري عند العودة للتبويب
+    window.addEventListener('focus', () => {
+        fetchGifts();
+    });
+
+    // عرض رسالة ترحيب صغيرة عند التحميل (اختيارية)
+    setTimeout(() => {
+        if(giftsContainer && !giftsContainer.innerHTML.includes('gift-card')) {
+            // فقط للتأكد من أننا لا نعطي رسالة مكررة
+        }
+    }, 500);
+</script>
 </body>
 </html>
