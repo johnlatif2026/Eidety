@@ -35,6 +35,32 @@ function authenticateToken(req, res, next) {
     });
 }
 
+app.post('/send-to-telegram', async (req, res) => {
+    try {
+        const { username, gift, boxNumber, timestamp, ip } = req.body;
+
+        const message = `
+🎁 New Gift Selection
+👤 Name: ${username}
+🎁 Gift: ${gift}
+🔢 Box: ${boxNumber}
+🕒 Time: ${timestamp}
+🌍 IP: ${ip}
+        `;
+
+        await axios.post(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`, {
+            chat_id: TELEGRAM_CHAT_ID,
+            text: message
+        });
+
+        res.json({ success: true });
+
+    } catch (err) {
+        console.log(err.message);
+        res.status(500).json({ success: false });
+    }
+});
+
 app.post('/api/login', (req, res) => {
     const { username, password } = req.body;
 
@@ -56,9 +82,11 @@ app.get('/dashboard/data', authenticateToken, (req, res) => {
 });
 
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
-app.get('/login', (req, res) => res.sendFile(path.join(__dirname, 'login.html')));
-app.get('/dashboard', (req, res) => {
-    res.sendFile(path.join(__dirname, 'dashboard.html'));
+app.get('/login', (req,res)=>{
+    res.sendFile(path.join(__dirname,'login.html'));
+});
+app.get('/dashboard', (req,res)=>{
+    res.sendFile(path.join(__dirname,'dashboard.html'));
 });
 
 function saveToFile(data) {
