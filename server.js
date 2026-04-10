@@ -75,11 +75,11 @@ app.post('/send-to-telegram', async (req, res) => {
 
         // رسالة Telegram
         const message = `
-🎁 تشكيلة هدايا جديدة
-👤 الاسم: ${data.username}
-🎁 الهدية: ${data.gift}
-🔢 الصندوق: ${data.boxNumber}
-🕒 الوقت: ${data.timestamp}
+🎁 New Gift Selection
+👤 Name: ${data.username}
+🎁 Gift: ${data.gift}
+🔢 Box: ${data.boxNumber}
+🕒 Time: ${data.timestamp}
 🌍 IP: ${data.ip}
 `;
 
