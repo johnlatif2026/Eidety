@@ -57,7 +57,9 @@ app.get('/dashboard/data', authenticateToken, (req, res) => {
 
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
 app.get('/login', (req, res) => res.sendFile(path.join(__dirname, 'login.html')));
-app.get('/dashboard', authenticateToken, (req, res) => res.sendFile(path.join(__dirname, 'dashboard.html')));
+app.get('/dashboard', (req, res) => {
+    res.sendFile(path.join(__dirname, 'dashboard.html'));
+});
 
 function saveToFile(data) {
     const filePath = path.join(__dirname, 'data.json');
