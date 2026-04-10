@@ -74,19 +74,19 @@ app.post('/send-to-telegram', async (req, res) => {
         await saveToFirebase(data);
 
         // رسالة Telegram
-        const message = 
+        const message = `
 🎁 تشكيلة هدايا جديدة
 👤 الاسم: ${data.username}
 🎁 الهدية: ${data.gift}
 🔢 الصندوق: ${data.boxNumber}
 🕒 الوقت: ${data.timestamp}
 🌍 IP: ${data.ip}
-        ;
+`;
 
-        await axios.post(https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage, {
-            chat_id: TELEGRAM_CHAT_ID,
-            text: message
-        });
+        await axios.post(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`, {
+    chat_id: TELEGRAM_CHAT_ID,
+    text: message
+});
 
         res.json({ success: true });
 
