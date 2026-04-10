@@ -599,17 +599,7 @@ async function checkSiteStatus() {
         const data = await res.json();
 
         if (!data.open) {
-            showLockScreen();
-            return false;
-        }
-        return true;
-    } catch (e) {
-        return true;
-    }
-}
-
-function showLockScreen() {
-    document.body.innerHTML = `
+            document.body.innerHTML = `
         <div style="
             height:100vh;
             display:flex;
@@ -623,26 +613,27 @@ function showLockScreen() {
             <h1>الموقع مغلق حالياً</h1>
             <p>ارجع لاحقاً</p>
         </div>
-    `;
+            `;
+            return false;
+        }
+        return true;
+    } catch (e) {
+        return true;
+    }
 }
 
 window.onload = async function () {
-    const allowed = await checkSiteStatus();
-    if (!allowed) return;
+    const ok = await checkSiteStatus();
+    if (!ok) return;
 
     createSnowflakes();
-
-    const savedName = localStorage.getItem('username');
-    const savedGift = localStorage.getItem('gift');
-
-    if (savedName && savedGift) {
-        showGiftPage(savedName);
-        showGift(savedGift);
-        disableAllBoxes();
-    } else if (savedName) {
-        document.getElementById('username').value = savedName;
-    }
 };
+
+
+function showLockScreen() {
+    
+    `;
+}
         
         // إنشاء الثلج في الخلفية
         function createSnowflakes() {
