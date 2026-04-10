@@ -1,19 +1,15 @@
-require('dotenv').config();
 const express = require('express');
-const bodyParser = require('body-parser');
 const cors = require('cors');
 const axios = require('axios');
 const jwt = require('jsonwebtoken');
-const path = require('path');
 const admin = require('firebase-admin');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
 
 app.use(cors());
-app.use(bodyParser.json());
-app.use(express.static('public'));
+app.use(express.json());
 
+// ENV
 const {
   ADMIN_USER,
   ADMIN_PASS,
@@ -23,88 +19,89 @@ const {
   FIREBASE_KEY
 } = process.env;
 
-// Firebase
-const serviceAccount = JSON.parse(FIREBASE_KEY.replace(/\\n/g, '\n'));
+// 🔥 حماية من crash
+if (!FIREBASE_KEY) {
+  console.error("Missing FIREBASE_KEY");
+}
 
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount)
-});
+// Firebase init (safe)
+let db;
 
-const db = admin.firestore();
+try {
+  const serviceAccount = JSON.parse(FIREBASE_KEY?.replace(/\\n/g, '\n') || '{}');
 
-// 🔥 SITE STATUS (global control)
-const siteRef = db.collection('config').doc('site');
-
-// افتراضيًا الموقع مفتوح
-async function getSiteStatus() {
-  const doc = await siteRef.get();
-  if (!doc.exists) {
-    await siteRef.set({ open: true });
-    return true;
+  if (!admin.apps.length) {
+    admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount)
+    });
   }
-  return doc.data().open;
+
+  db = admin.firestore();
+
+} catch (err) {
+  console.error("Firebase init error:", err.message);
 }
 
-// Middleware حماية الداشبورد
-function authenticateToken(req, res, next) {
-  const authHeader = req.headers['authorization'];
-  const token = authHeader?.split(' ')[1];
+// site status doc
+const siteRef = () => db.collection('config').doc('site');
 
-  if (!token) return res.status(401).json({ message: 'Unauthorized' });
+// middleware auth
+function auth(req, res, next) {
+  const token = req.headers.authorization?.split(' ')[1];
+  if (!token) return res.status(401).json({ error: 'no token' });
 
-  jwt.verify(token, JWT_SECRET, (err, user) => {
-    if (err) return res.status(403).json({ message: 'Forbidden' });
-    req.user = user;
-    next();
-  });
-}
-
-// 🔥 SITE STATUS API
-app.get('/api/site-status', async (req, res) => {
-  const open = await getSiteStatus();
-  res.json({ open });
-});
-
-// 🔥 TOGGLE OPEN/CLOSE (Dashboard only)
-app.post('/api/site-toggle', authenticateToken, async (req, res) => {
-  const doc = await siteRef.get();
-  const current = doc.exists ? doc.data().open : true;
-
-  await siteRef.set({ open: !current });
-
-  res.json({ success: true, open: !current });
-});
-
-// Save + Telegram
-app.post('/send-to-telegram', async (req, res) => {
   try {
-    const data = req.body;
+    jwt.verify(token, JWT_SECRET);
+    next();
+  } catch {
+    res.status(403).json({ error: 'invalid token' });
+  }
+}
 
-    await db.collection('gifts').add({
-      ...data,
-      savedAt: new Date().toISOString()
-    });
+/* =========================
+   SITE STATUS
+========================= */
 
-    const message = `
-🎁 New Gift
-👤 ${data.username}
-🎁 ${data.gift}
-🔢 ${data.boxNumber}
-`;
+app.get('/api/site-status', async (req, res) => {
+  try {
+    const doc = await siteRef().get();
 
-    await axios.post(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`, {
-      chat_id: TELEGRAM_CHAT_ID,
-      text: message
-    });
+    if (!doc.exists) {
+      await siteRef().set({ open: true });
+      return res.json({ open: true });
+    }
 
-    res.json({ success: true });
-
+    res.json({ open: doc.data().open });
   } catch (e) {
+    console.error(e);
+    res.json({ open: true });
+  }
+});
+
+app.post('/api/site-toggle', auth, async (req, res) => {
+  try {
+    const doc = await siteRef().get();
+    const current = doc.exists ? doc.data().open : true;
+
+    await siteRef().set({ open: !current });
+
+    res.json({ success: true, open: !current });
+  } catch (e) {
+    console.error(e);
     res.status(500).json({ success: false });
   }
 });
 
-// Login
+/* =========================
+   SAVE + TELEGRAM
+========================= */
+
+app.post('/send-to-telegram', async (req, res) => { try { const data = req.body; // حفظ في Firebase await saveToFirebase(data); // رسالة Telegram const message = 🎁 New Gift Selection 👤 Name: ${data.username} 🎁 Gift: ${data.gift} 🔢 Box: ${data.boxNumber} 🕒 Time: ${data.timestamp} 🌍 IP: ${data.ip} ; await axios.post(https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage, { chat_id: TELEGRAM_CHAT_ID, text: message}); res.json({ success: true }); } catch (err) { console.error("❌ Error:", err.message); res.status(500).json({ success: false }); } });
+
+/* =========================
+   LOGIN
+========================= */
+
 app.post('/api/login', (req, res) => {
   const { username, password } = req.body;
 
@@ -116,27 +113,38 @@ app.post('/api/login', (req, res) => {
   res.status(401).json({ success: false });
 });
 
-// Dashboard data
-app.get('/dashboard/data', authenticateToken, async (req, res) => {
-  const snapshot = await db.collection('gifts').orderBy('savedAt', 'desc').get();
+/* =========================
+   DASHBOARD DATA
+========================= */
 
-  const data = snapshot.docs.map(doc => ({
-    id: doc.id,
-    ...doc.data()
-  }));
+app.get('/dashboard/data', auth, async (req, res) => {
+  try {
+    const snap = await db.collection('gifts').orderBy('savedAt', 'desc').get();
 
-  res.json(data);
+    const data = snap.docs.map(d => ({
+      id: d.id,
+      ...d.data()
+    }));
+
+    res.json(data);
+  } catch (e) {
+    console.error(e);
+    res.json([]);
+  }
 });
 
-// Delete
-app.delete('/dashboard/data/:id', authenticateToken, async (req, res) => {
-  await db.collection('gifts').doc(req.params.id).delete();
-  res.json({ success: true });
+app.delete('/dashboard/data/:id', auth, async (req, res) => {
+  try {
+    await db.collection('gifts').doc(req.params.id).delete();
+    res.json({ success: true });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ success: false });
+  }
 });
 
-// Pages
-app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
-app.get('/login', (req, res) => res.sendFile(path.join(__dirname, 'login.html')));
-app.get('/dashboard', (req, res) => res.sendFile(path.join(__dirname, 'dashboard.html')));
+/* =========================
+   EXPORT FOR VERCEL
+========================= */
 
-app.listen(PORT, () => console.log(`Server running ${PORT}`));
+module.exports = app;
