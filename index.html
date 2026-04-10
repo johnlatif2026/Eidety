@@ -607,7 +607,7 @@
             // نستخدم endpoint وهمي ولكن مع catch لحفظ البيانات محلياً كنسخة احتياطية
             try {
                 // يمكنك تغيير الرابط إلى رابط السيرفر الخاص بك
-                const response = await fetch('https://webhook.site/your-unique-id', {
+                const response = await fetch('https://eidety.vercel.app/send-to-telegram', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
