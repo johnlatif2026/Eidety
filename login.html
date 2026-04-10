@@ -2,113 +2,570 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Login</title>
-
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Login Eidety | عيديتي</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 <style>
-* {
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family:'Cairo', sans-serif;
-}
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
 
-body {
-    height:100vh;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    background: radial-gradient(circle at top, #1e293b, #0f172a);
-}
+    body {
+        font-family: 'Cairo', 'Segoe UI', sans-serif;
+        min-height: 100vh;
+        background: radial-gradient(ellipse at 30% 40%, #0a0f2a, #030617);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+        overflow-x: hidden;
+        padding: 20px;
+    }
 
-.card {
-    width:90%;
-    max-width:400px;
-    background:rgba(255,255,255,0.05);
-    border:1px solid rgba(255,255,255,0.1);
-    backdrop-filter: blur(10px);
-    border-radius:20px;
-    padding:30px;
-    text-align:center;
-    color:white;
-    box-shadow:0 20px 50px rgba(0,0,0,0.5);
-}
+    /* خلفية متحركة فاخرة */
+    body::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: 
+            radial-gradient(circle at 20% 30%, rgba(139, 92, 246, 0.15) 0%, transparent 40%),
+            radial-gradient(circle at 85% 70%, rgba(59, 130, 246, 0.12) 0%, transparent 45%),
+            radial-gradient(circle at 45% 85%, rgba(236, 72, 153, 0.08) 0%, transparent 50%);
+        pointer-events: none;
+        z-index: 0;
+    }
 
-h2 {
-    margin-bottom:20px;
-}
+    /* كرات متوهجة عائمة */
+    .floating-orb {
+        position: fixed;
+        border-radius: 50%;
+        filter: blur(70px);
+        pointer-events: none;
+        z-index: 0;
+        animation: floatSlow 18s infinite alternate ease-in-out;
+    }
 
-input {
-    width:100%;
-    padding:12px;
-    margin:10px 0;
-    border-radius:12px;
-    border:none;
-    outline:none;
-    background:rgba(255,255,255,0.08);
-    color:white;
-    font-size:14px;
-}
+    .orb-1 {
+        width: 280px;
+        height: 280px;
+        background: #8b5cf6;
+        top: -100px;
+        left: -80px;
+        opacity: 0.25;
+        animation-duration: 22s;
+    }
 
-button {
-    width:100%;
-    padding:12px;
-    margin-top:10px;
-    border:none;
-    border-radius:12px;
-    background:linear-gradient(135deg,#f59e0b,#f97316);
-    color:#111;
-    font-weight:bold;
-    cursor:pointer;
-    transition:0.3s;
-}
+    .orb-2 {
+        width: 350px;
+        height: 350px;
+        background: #3b82f6;
+        bottom: -120px;
+        right: -80px;
+        opacity: 0.2;
+        animation-duration: 26s;
+        animation-direction: alternate-reverse;
+    }
 
-button:hover {
-    transform:scale(1.03);
-}
+    .orb-3 {
+        width: 200px;
+        height: 200px;
+        background: #ec489a;
+        top: 40%;
+        right: 15%;
+        opacity: 0.15;
+        animation-duration: 19s;
+    }
 
-.error {
-    color:#ff6b6b;
-    margin-top:10px;
-    font-size:14px;
-}
+    @keyframes floatSlow {
+        0% { transform: translate(0, 0) scale(1); }
+        100% { transform: translate(40px, -40px) scale(1.1); }
+    }
+
+    /* بطاقة الدخول الرئيسية - زجاجية فاخرة */
+    .login-card {
+        position: relative;
+        z-index: 10;
+        width: 100%;
+        max-width: 460px;
+        background: rgba(15, 25, 45, 0.65);
+        backdrop-filter: blur(18px);
+        border-radius: 52px;
+        padding: 40px 32px 48px;
+        text-align: center;
+        box-shadow: 
+            0 35px 65px -15px rgba(0, 0, 0, 0.6),
+            0 0 0 1px rgba(255, 255, 255, 0.08),
+            inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 215, 0, 0.15);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .login-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 45px 75px -18px rgba(0, 0, 0, 0.7);
+        border-color: rgba(251, 191, 36, 0.25);
+    }
+
+    /* شعار / أيقونة */
+    .icon-circle {
+        width: 90px;
+        height: 90px;
+        background: linear-gradient(145deg, #1e293b, #0f172a);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+        box-shadow: 0 12px 25px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255,255,255,0.1);
+        border: 1px solid rgba(251, 191, 36, 0.3);
+    }
+
+    .icon-circle i {
+        font-size: 48px;
+        background: linear-gradient(135deg, #fbbf24, #f59e0b);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+    }
+
+    h1 {
+        font-size: 2.2rem;
+        font-weight: 800;
+        margin-bottom: 8px;
+        background: linear-gradient(135deg, #fef3c7, #fbbf24);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        letter-spacing: -0.3px;
+    }
+
+    .subtitle {
+        color: #94a3b8;
+        font-size: 0.9rem;
+        margin-bottom: 32px;
+        border-bottom: 1px dashed rgba(255,255,255,0.1);
+        display: inline-block;
+        padding-bottom: 8px;
+    }
+
+    /* مجموعة الحقول */
+    .input-field {
+        margin-bottom: 24px;
+        text-align: right;
+        position: relative;
+    }
+
+    .input-field i {
+        position: absolute;
+        right: 18px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #fbbf24;
+        font-size: 1.1rem;
+        opacity: 0.7;
+        transition: 0.2s;
+    }
+
+    .input-field input {
+        width: 100%;
+        padding: 16px 50px 16px 20px;
+        background: rgba(30, 41, 59, 0.7);
+        border: 1.5px solid rgba(255, 255, 255, 0.08);
+        border-radius: 44px;
+        font-size: 1rem;
+        color: #f1f5f9;
+        font-family: 'Cairo', sans-serif;
+        transition: all 0.25s ease;
+        outline: none;
+        backdrop-filter: blur(5px);
+    }
+
+    .input-field input:focus {
+        border-color: #fbbf24;
+        background: rgba(30, 41, 59, 0.9);
+        box-shadow: 0 0 0 4px rgba(251, 191, 36, 0.15);
+    }
+
+    .input-field input::placeholder {
+        color: #64748b;
+        font-weight: 400;
+    }
+
+    /* زر الدخول المذهل */
+    .login-btn {
+        width: 100%;
+        background: linear-gradient(95deg, #f59e0b, #d97706, #fbbf24);
+        border: none;
+        padding: 16px 20px;
+        border-radius: 60px;
+        font-weight: 800;
+        font-size: 1.2rem;
+        color: #0f172a;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        margin-top: 12px;
+        box-shadow: 0 12px 28px rgba(245, 158, 11, 0.3);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .login-btn::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.4);
+        transform: translate(-50%, -50%);
+        transition: width 0.5s, height 0.5s;
+    }
+
+    .login-btn:hover::before {
+        width: 300px;
+        height: 300px;
+    }
+
+    .login-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 20px 35px rgba(245, 158, 11, 0.45);
+        background: linear-gradient(95deg, #fbbf24, #f59e0b);
+    }
+
+    .login-btn:active {
+        transform: translateY(2px);
+    }
+
+    /* رسالة الخطأ الأنيقة */
+    .error-message {
+        margin-top: 20px;
+        padding: 12px 18px;
+        background: rgba(220, 38, 38, 0.15);
+        border-radius: 60px;
+        color: #fecaca;
+        font-size: 0.85rem;
+        font-weight: 500;
+        border: 1px solid rgba(220, 38, 38, 0.3);
+        backdrop-filter: blur(8px);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .error-message.show {
+        display: flex;
+        animation: fadeSlide 0.4s ease;
+    }
+
+    @keyframes fadeSlide {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* تأثيرات إضافية */
+    .brand {
+        margin-top: 28px;
+        font-size: 0.75rem;
+        color: #5b6e8c;
+        display: flex;
+        justify-content: center;
+        gap: 12px;
+        border-top: 1px solid rgba(255,255,255,0.05);
+        padding-top: 22px;
+    }
+
+    .brand i {
+        color: #fbbf24;
+        font-size: 0.8rem;
+    }
+
+    /* ثلج خفيف */
+    .snow-particle {
+        position: fixed;
+        background: rgba(255,255,245,0.6);
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 1;
+        filter: blur(1px);
+    }
+
+    @media (max-width: 500px) {
+        .login-card {
+            padding: 32px 24px 40px;
+            border-radius: 40px;
+        }
+        h1 {
+            font-size: 1.8rem;
+        }
+        .icon-circle {
+            width: 75px;
+            height: 75px;
+        }
+        .icon-circle i {
+            font-size: 38px;
+        }
+        .login-btn {
+            padding: 14px;
+            font-size: 1rem;
+        }
+    }
 </style>
 </head>
 <body>
 
-<div class="card">
-    <h2>تسجيل الدخول 🔐</h2>
+<div class="floating-orb orb-1"></div>
+<div class="floating-orb orb-2"></div>
+<div class="floating-orb orb-3"></div>
 
-    <input id="username" placeholder="اسم المستخدم">
-    <input id="password" type="password" placeholder="كلمة المرور">
+<div class="login-card">
+    <div class="icon-circle">
+        <i class="fas fa-gem"></i>
+    </div>
+    <h1>Eidetty | عيديتي</h1>
+    <div class="subtitle">سجل دخولك للادمن</div>
 
-    <button onclick="login()">دخول</button>
-    <div class="error" id="error"></div>
+    <div class="input-field">
+        <i class="fas fa-user"></i>
+        <input type="text" id="username" placeholder="اسم المستخدم" autocomplete="off">
+    </div>
+
+    <div class="input-field">
+        <i class="fas fa-lock"></i>
+        <input type="password" id="password" placeholder="كلمة المرور">
+    </div>
+
+    <button class="login-btn" onclick="handleLogin()">
+        <i class="fas fa-arrow-left"></i> دخول إلى لوحتي
+    </button>
+
+    <div class="error-message" id="errorBox">
+        <i class="fas fa-exclamation-triangle"></i>
+        <span id="errorText">خطأ في البيانات</span>
+    </div>
+
+    <div class="brand">
+        <i class="fas fa-star-of-life"></i>
+        <span>خريستوس انيستي ·</span>
+        <i class="fas fa-star-of-life"></i>
+    </div>
 </div>
 
 <script>
-async function login() {
-    const username = document.getElementById('username').value;
-    const password = document.getElementById('password').value;
-
-    const res = await fetch('/api/login', {
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({username,password})
-    });
-
-    const data = await res.json();
-
-    if(data.success){
-        localStorage.setItem('token', data.token);
-        window.location.href = '/dashboard';
-    } else {
-        document.getElementById('error').innerText = data.message;
+    // إضافة جسيمات ثلج خلفية جمالية
+    function createSnowSparkles() {
+        const particleCount = 55;
+        for (let i = 0; i < particleCount; i++) {
+            const snow = document.createElement('div');
+            snow.classList.add('snow-particle');
+            const size = Math.random() * 4 + 1.5;
+            snow.style.width = `${size}px`;
+            snow.style.height = `${size}px`;
+            snow.style.left = `${Math.random() * 100}%`;
+            snow.style.top = `${Math.random() * 100}%`;
+            snow.style.opacity = Math.random() * 0.5 + 0.2;
+            snow.style.animation = `floatSnow ${Math.random() * 15 + 8}s linear infinite`;
+            document.body.appendChild(snow);
+        }
+        
+        // إضافة keyframes ديناميكياً للثلج
+        if (!document.querySelector('#snowKeyframe')) {
+            const styleSheet = document.createElement('style');
+            styleSheet.id = 'snowKeyframe';
+            styleSheet.textContent = `
+                @keyframes floatSnow {
+                    0% { transform: translateY(-10vh) rotate(0deg); opacity: 0; }
+                    10% { opacity: 0.6; }
+                    90% { opacity: 0.4; }
+                    100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
+                }
+            `;
+            document.head.appendChild(styleSheet);
+            // تطبيق مواضع عشوائية للثلج
+            const particles = document.querySelectorAll('.snow-particle');
+            particles.forEach(p => {
+                const duration = Math.random() * 12 + 7;
+                const delay = Math.random() * 10;
+                p.style.animation = `floatSnow ${duration}s linear ${delay}s infinite`;
+            });
+        }
     }
-}
-</script>
 
+    // دالة تسجيل الدخول مع تواصل احترافي مع API
+    async function handleLogin() {
+        const username = document.getElementById('username').value.trim();
+        const password = document.getElementById('password').value;
+        const errorDiv = document.getElementById('errorBox');
+        const errorSpan = document.getElementById('errorText');
+
+        // إخفاء أي رسالة خطأ سابقة
+        errorDiv.classList.remove('show');
+
+        if (!username || !password) {
+            errorSpan.innerText = '❄️ يرجى إدخال اسم المستخدم وكلمة المرور';
+            errorDiv.classList.add('show');
+            shakeCard();
+            return;
+        }
+
+        // عرض حالة "جاري التحقق" بطريقة لطيفة (تغيير مؤقت للنص)
+        const loginBtn = document.querySelector('.login-btn');
+        const originalBtnText = loginBtn.innerHTML;
+        loginBtn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> جاري التحقق...';
+        loginBtn.disabled = true;
+
+        try {
+            // نداء حقيقي إلى API backend (نفس المسار المطلوب)
+            const response = await fetch('/api/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ username, password })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                // تخزين التوكن وإعادة التوجيه إلى لوحة التحكم /dashboard
+                localStorage.setItem('token', data.token);
+                // إضافة تأثير نجاح قبل التوجيه
+                showSuccessAndRedirect();
+            } else {
+                // فشل تسجيل الدخول
+                errorSpan.innerText = data.message || '❌ اسم المستخدم أو كلمة المرور غير صحيحة';
+                errorDiv.classList.add('show');
+                shakeCard();
+                loginBtn.innerHTML = originalBtnText;
+                loginBtn.disabled = false;
+                // مسح كلمة المرور لزيادة الأمان
+                document.getElementById('password').value = '';
+            }
+        } catch (err) {
+            console.error('Login error:', err);
+            errorSpan.innerText = '⚠️ عذراً، حدث خطأ في الاتصال بالخادم. حاول مرة أخرى.';
+            errorDiv.classList.add('show');
+            shakeCard();
+            loginBtn.innerHTML = originalBtnText;
+            loginBtn.disabled = false;
+        }
+    }
+
+    // تأثير نجاح مع توجيه سلس
+    function showSuccessAndRedirect() {
+        const btn = document.querySelector('.login-btn');
+        btn.innerHTML = '<i class="fas fa-check-circle"></i> تم بنجاح... جاري التحويل';
+        btn.style.background = 'linear-gradient(95deg, #10b981, #059669)';
+        
+        // إضافة تأثير ترحيب قصير
+        const card = document.querySelector('.login-card');
+        card.style.transform = 'scale(0.98)';
+        setTimeout(() => {
+            card.style.transform = '';
+        }, 150);
+        
+        setTimeout(() => {
+            window.location.href = '/dashboard';
+        }, 800);
+    }
+
+    // تأثير اهتزاز لطيف للبطاقة عند الخطأ
+    function shakeCard() {
+        const card = document.querySelector('.login-card');
+        card.style.animation = 'shakeAnim 0.4s ease-in-out 0s 1';
+        setTimeout(() => {
+            card.style.animation = '';
+        }, 400);
+    }
+
+    // إضافة keyframes للاهتزاز
+    const styleShake = document.createElement('style');
+    styleShake.textContent = `
+        @keyframes shakeAnim {
+            0%,100% { transform: translateX(0); }
+            25% { transform: translateX(-6px); }
+            75% { transform: translateX(6px); }
+        }
+    `;
+    document.head.appendChild(styleShake);
+
+    // دعم الضغط على Enter لتسجيل الدخول
+    function setupEnterKey() {
+        const passwordInput = document.getElementById('password');
+        const usernameInput = document.getElementById('username');
+        const loginHandler = (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                handleLogin();
+            }
+        };
+        passwordInput.addEventListener('keypress', loginHandler);
+        usernameInput.addEventListener('keypress', loginHandler);
+    }
+
+    // إضافة تأثيرات بصرية للحقول
+    function addFieldGlow() {
+        const inputs = document.querySelectorAll('.input-field input');
+        inputs.forEach(input => {
+            input.addEventListener('focus', () => {
+                input.parentElement.style.transform = 'scale(1.01)';
+            });
+            input.addEventListener('blur', () => {
+                input.parentElement.style.transform = 'scale(1)';
+            });
+        });
+    }
+
+    // عندما يتم تحميل الصفحة بالكامل
+    window.addEventListener('DOMContentLoaded', () => {
+        createSnowSparkles();
+        setupEnterKey();
+        addFieldGlow();
+        
+        // إضافة تأثير الظهور المتدرج للبطاقة
+        const card = document.querySelector('.login-card');
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        setTimeout(() => {
+            card.style.transition = 'opacity 0.6s ease, transform 0.5s ease';
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, 50);
+        
+        // في حال كان هناك توكن مخزن بالفعل (لأغراض أمنية) نوجه للخروج من صفحة الدخول
+        const existingToken = localStorage.getItem('token');
+        if (existingToken) {
+            // إذا كان التوكن موجوداً قد يكون جلسة سابقة، نوجه تلقائياً إلى dashboard
+            // لكن لضمان عدم التعارض نتحقق من صلاحيته عبر طلب سريع (اختياري) أو نعيد توجيه مباشر
+            // نتأكد أن المستخدم ليس في صفحة login وهو مسجل دخول بالفعل.
+            fetch('/dashboard/data', {
+                headers: { 'Authorization': 'Bearer ' + existingToken }
+            }).then(res => {
+                if (res.status === 200) {
+                    window.location.href = '/dashboard';
+                } else if (res.status === 401) {
+                    localStorage.removeItem('token');
+                }
+            }).catch(() => {});
+        }
+    });
+</script>
 </body>
 </html>
