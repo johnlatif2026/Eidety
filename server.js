@@ -147,21 +147,25 @@ app.get('/dashboard', (req,res)=>{
     res.sendFile(path.join(__dirname,'dashboard.html'));
 });
 
-// 🗑️ حذف عنصر من Firebase
 app.delete('/dashboard/data/:id', authenticateToken, async (req, res) => {
     try {
         const id = req.params.id;
 
-        if (!id) {
-            return res.status(400).send('ID مطلوب');
+        console.log("DELETE ID:", id);
+
+        const docRef = db.collection('gifts').doc(id);
+        const doc = await docRef.get();
+
+        if (!doc.exists) {
+            return res.status(404).send('العنصر غير موجود');
         }
 
-        await db.collection('gifts').doc(id).delete();
+        await docRef.delete();
 
-        res.json({ success: true });
+        res.json({ success: true, deletedId: id });
 
     } catch (err) {
-        console.error('❌ Delete Error:', err.message);
+        console.error('❌ Delete Error:', err);
         res.status(500).send('فشل الحذف');
     }
 });
