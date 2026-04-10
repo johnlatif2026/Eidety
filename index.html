@@ -538,8 +538,26 @@
             background: linear-gradient(135deg, #fbbf24, #f59e0b);
         }
     </style>
+    <style>
+#lock-container {
+    display: none;
+}
+    </style>
 </head>
 <body>
+    <div class="container" id="lock-container">
+    <h1>خريستوس أنستي ✨</h1>
+    <h3>Χριστός ἀνέστη</h3>
+
+    <img class="logo" src="https://i.postimg.cc/Nj83FS93/Eidety.jpg" alt="logo">
+
+    <h2>الموقع مقفول حالياً ❤️</h2>
+    <p style="margin-top:10px;color:#cbd5e1;font-size:1.1rem;">
+        سيتم فتح الموقع يوم 12/04/2026 الساعة 12:00
+    </p>
+
+    <div id="countdown" style="margin-top:25px;font-size:1.6rem;font-weight:700;color:#fbbf24;"></div>
+    </div>
     <div class="glow-orb orb-1"></div>
     <div class="glow-orb orb-2"></div>
     <div class="glow-orb orb-3"></div>
@@ -592,6 +610,44 @@
             "تحولي 50 جنيه 🎁"
         ];
 
+const unlockDate = new Date("2026-04-12T12:00:00").getTime();
+
+function updateCountdown() {
+    const now = new Date().getTime();
+    const distance = unlockDate - now;
+
+    if (distance <= 0) {
+        document.getElementById("lock-container").style.display = "none";
+        document.getElementById("username-container").style.display = "block";
+        clearInterval(timer);
+        return;
+    }
+
+    const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+    document.getElementById("countdown").innerHTML =
+        `${days} يوم - ${hours} ساعة - ${minutes} دقيقة - ${seconds} ثانية`;
+}
+
+function checkLock() {
+    const now = new Date().getTime();
+
+    if (now < unlockDate) {
+        document.getElementById("lock-container").style.display = "block";
+        document.getElementById("username-container").style.display = "none";
+        document.getElementById("gift-container").style.display = "none";
+    } else {
+        document.getElementById("lock-container").style.display = "none";
+    }
+}
+
+checkLock();
+const timer = setInterval(updateCountdown, 1000);
+updateCountdown();
+        
         // إنشاء الثلج في الخلفية
         function createSnowflakes() {
             for (let i = 0; i < 50; i++) {
