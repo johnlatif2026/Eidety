@@ -591,7 +591,58 @@
             "تحولي 50 جنيه 🎁",
             "تحولي 50 جنيه 🎁"
         ];
+const OPEN_DATE = new Date("2026-04-12T00:00:00");
 
+        function isLocked() {
+    const now = new Date();
+    const override = localStorage.getItem("override_open");
+    return now < OPEN_DATE && !override;
+}
+
+function formatTime(ms) {
+    const s = Math.floor(ms / 1000);
+    const days = Math.floor(s / 86400);
+    const hours = Math.floor((s % 86400) / 3600);
+    const minutes = Math.floor((s % 3600) / 60);
+    const seconds = s % 60;
+    return `${days} يوم - ${hours} ساعة - ${minutes} دقيقة - ${seconds} ثانية`;
+}
+
+function showLockScreen() {
+    document.body.innerHTML = `
+        <div style="
+            height:100vh;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            flex-direction:column;
+            text-align:center;
+            font-family:Cairo;
+            background:linear-gradient(145deg,#0a0f1a,#0f172a);
+            color:white;
+        ">
+            <h1>هذا الموقع مغلق</h1>
+            <h2>خريستوس أنستي ✝️</h2>
+            <p style="margin-top:10px;">يُفتح خلال:</p>
+            <h3 id="countdown"></h3>
+        </div>
+    `;
+
+    const el = document.getElementById("countdown");
+
+    setInterval(() => {
+        const now = new Date();
+        const diff = OPEN_DATE - now;
+
+        if (diff <= 0) {
+            location.reload();
+            return;
+        }
+
+        el.innerText = formatTime(diff);
+    }, 1000);
+}
+        
         // إنشاء الثلج في الخلفية
         function createSnowflakes() {
             for (let i = 0; i < 50; i++) {
@@ -633,20 +684,25 @@
         }
 
         // تحميل البيانات المحفوظة
-        window.onload = function() {
-            createSnowflakes();
-            
-            const savedName = localStorage.getItem('username');
-            const savedGift = localStorage.getItem('gift');
-            
-            if (savedName && savedGift) {
-                showGiftPage(savedName);
-                showGift(savedGift);
-                disableAllBoxes();
-            } else if (savedName) {
-                document.getElementById('username').value = savedName;
-            }
-        };
+        window.onload = function () {
+    if (isLocked()) {
+        showLockScreen();
+        return;
+    }
+
+    createSnowflakes();
+
+    const savedName = localStorage.getItem('username');
+    const savedGift = localStorage.getItem('gift');
+
+    if (savedName && savedGift) {
+        showGiftPage(savedName);
+        showGift(savedGift);
+        disableAllBoxes();
+    } else if (savedName) {
+        document.getElementById('username').value = savedName;
+    }
+};
 
         function start() {
             const nameInput = document.getElementById('username');
