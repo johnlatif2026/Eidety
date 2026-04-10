@@ -420,20 +420,20 @@
         window.location.href = '/login';
     }
 
-function toggleOverride() {
-    const current = localStorage.getItem("override_open");
+async function toggleOverride() {
+    const res = await fetch('/api/site-toggle', {
+        method: 'POST',
+        headers: {
+            'Authorization': 'Bearer ' + token,
+            'Content-Type': 'application/json'
+        }
+    });
 
-    if (current) {
-        localStorage.removeItem("override_open");
-        showModernToast("🔒 The site has been activated");
-    } else {
-        localStorage.setItem("override_open", "true");
-        showModernToast("🔓 The site was opened manually");
+    const data = await res.json();
+
+    if (data.success) {
+        showModernToast(data.open ? "🔓 Opened for everyone" : "🔒 Closed for everyone");
     }
-
-    setTimeout(() => {
-        window.open("/", "_blank");
-    }, 300);
 }
    
     // عناصر DOM
